@@ -1,9 +1,7 @@
 Installation
 
 Installing Drinks is simply. Just download the toolkit from www.goincompany.com/drinks.php , extract and upload the folder in the server where you want to place your application.
-In your html page you need to link the javascript files just inserting the script tag:
-
-  <script type="text/Javascript" src="Path to Drinks.js"></script>.
+In your html page you need to link to Drinks.js (see documentation for knowing more).
 
 Your application is ready to work.
 
