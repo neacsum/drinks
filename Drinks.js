@@ -313,8 +313,8 @@ function loadDrinks(){
 			path = sarr[i].src.substr(0, index);
 		}
 	}
-//	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'], path, initialize);    //Include JS scripts using Cache
-	includeJSNoCache(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js', 'ResizeDrag.js','HTMLexpansions.js'], path, initialize); //Include JS scripts without Cache
+	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'], path, initialize);    //Include JS scripts using Cache
+//	includeJSNoCache(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js', 'ResizeDrag.js','HTMLexpansions.js'], path, initialize); //Include JS scripts without Cache
 }
 
 function debug(id, msg){
