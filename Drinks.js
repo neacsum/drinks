@@ -29,60 +29,6 @@
   	http://www.goincompany.com/drinks.php
 
 ***************************************************************************************************************/
-/*
- * object.watch polyfill
- *
- * 2012-04-03
- *
- * By Eli Grey, http://eligrey.com
- * Public Domain.
- * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
- */
-
-// object.watch
-if (!Object.prototype.watch) {
-	Object.defineProperty(Object.prototype, "watch", {
-		  enumerable: false
-		, configurable: true
-		, writable: false
-		, value: function (prop, handler) {
-			var
-			  oldval = this[prop]
-			, newval = oldval
-			, getter = function () {
-				return newval;
-			}
-			, setter = function (val) {
-				oldval = newval;
-				return newval = handler.call(this, prop, oldval, val);
-			}
-			;
-
-			if (delete this[prop]) { // can't watch constants
-				Object.defineProperty(this, prop, {
-					  get: getter
-					, set: setter
-					, enumerable: true
-					, configurable: true
-				});
-			}
-		}
-	});
-}
-
-// object.unwatch
-if (!Object.prototype.unwatch) {
-	Object.defineProperty(Object.prototype, "unwatch", {
-		  enumerable: false
-		, configurable: true
-		, writable: false
-		, value: function (prop) {
-			var val = this[prop];
-			delete this[prop]; // remove accessors
-			this[prop] = val;
-		}
-	});
-}
 
 function Ajax(){
 
@@ -185,17 +131,6 @@ function reloadDrinks(){
 	}
 }
 
-if (!Function.prototype.bind) {
-  Function.prototype.bind = function(){ 
-    var fn = this, args = Array.prototype.slice.call(arguments),
-        object = args.shift(); 
-    return function(){ 
-      return fn.apply(object, 
-        args.concat(Array.prototype.slice.call(arguments))); 
-    }; 
-  };
-}
-
 CanvasRenderingContext2D.prototype.dashedLineTo = function (fromX, fromY, toX, toY) {
 	var lt = function (a, b) { return a <= b; };
 	var gt = function (a, b) { return a >= b; };
@@ -282,28 +217,6 @@ var includeJS = (function(){
 	});
 })();
 
-var includeJSNoCache = (function(){
-	var count=0;
-	return (function(script, path, handler){
-		function create(){
-			var s = document.createElement('script');
-			s.src = path+script[count]+'?'+Math.random()*1000;
-			s.type = 'text/javascript';
-			document.head.appendChild(s);
-			s.onload = function(){
-				count++;
-				if(count==script.length){
-					handler.call();
-				}
-				else
-					create();
-
-			};
-		}
-		create();
-	});
-})();
-
 function loadDrinks(){
 	var sarr = document.getElementsByTagName('script');
 	var path = "";
@@ -313,12 +226,8 @@ function loadDrinks(){
 			path = sarr[i].src.substr(0, index);
 		}
 	}
-	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'], path, initialize);    //Include JS scripts using Cache
-//	includeJSNoCache(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js', 'ResizeDrag.js','HTMLexpansions.js'], path, initialize); //Include JS scripts without Cache
-}
-
-function debug(id, msg){
-	document.getElementById(id).innerHTML = msg;
+	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'], path, initialize);
+//	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js', 'ResizeDrag.js','HTMLexpansions.js'], path, initialize);
 }
 
 function Drinks(){};
@@ -360,7 +269,7 @@ function initialize(){
 	for(var i=0; i<arr.length; i++){
 		Drinks.buildElement(arr.item(i));
 	}
-	Drinks.ready.call();
+	Drinks.ready();
 	function render(){
 		for(var e in earr){
 			if(document.getElementById(e))
