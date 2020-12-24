@@ -402,12 +402,12 @@ function draggable_item(element){
 				element.style.top = (pos.y)+"px";
 				if(document.getElementById('style'))
 					document.getElementById('style').value=element.getAttribute('style');
-				if(Drinks.getElementById(inschild.child.id).parent!=inschild.parent){
+				if(drinks.getElementById(inschild.child.id).parent!=inschild.parent){
 					if(inschild.parent==topcontainer)
-						Drinks.getElementById(inschild.child.id).parent=topcontainer;
+						drinks.getElementById(inschild.child.id).parent=topcontainer;
 					inschild.parent.appendChild(inschild.child);
-					selected = Drinks.getElementById(inschild.child.id).canvas;
-					selected.refer = Drinks.getElementById(inschild.child.id).html;
+					selected = drinks.getElementById(inschild.child.id).canvas;
+					selected.refer = drinks.getElementById(inschild.child.id).html;
 				}
 				for(var i in inschild.child.cursors)
 					inschild.child.appendChild(inschild.child.cursors[i].getCursor());

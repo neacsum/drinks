@@ -1014,7 +1014,7 @@ function ArcLed(element){
 	var color = element.getAttribute("color") || "lawngreen";
 	
 
-	var swel = Drinks.createElement("switch");	
+	var swel = drinks.createElement("switch");	
 	swel.setAttribute("id", parent_id+'sw');
 	swel.setAttribute("type", "arc");
 	swel.setAttribute("style", style);
@@ -1023,7 +1023,7 @@ function ArcLed(element){
 	swel.setAttribute("width", width);
 	swel.setAttribute("height", height);
 	this.appendChild(swel);
-	var led = Drinks.createElement("led");	
+	var led = drinks.createElement("led");	
 	led.setAttribute("id", parent_id+"led");
 	led.setAttribute("color", color);
 	led.setAttribute("type", "triangle");

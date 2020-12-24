@@ -125,8 +125,8 @@ function Ajax(){
 function reloadDrinks(){
 	var arr = document.getElementsByTagName("*");
 	for(var i=0; i<arr.length; i++){
-		if(arr.item(i).id && !Drinks.getElementById(arr.item(i).id)){
-			Drinks.buildElement(arr.item(i));
+		if(arr.item(i).id && !drinks.getElementById(arr.item(i).id)){
+			drinks.buildElement(arr.item(i));
 		}
 	}
 }
@@ -230,83 +230,120 @@ function loadDrinks(){
 //	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js', 'ResizeDrag.js','HTMLexpansions.js'], path, initialize);
 }
 
-function Drinks(){};
-
-Drinks.buildElement = function(element){
-	var tag = element.nodeName;
-		if(all_type[tag.toLowerCase()]){
-			if(element.getAttribute("resizable")=="true") 
-				attach(element, "dblclick", function(event){ResizeDrag(event);});
-
-			if(have_parent(element) && !earr[element.id]){
-				if(typeof(all_type[tag.toLowerCase()])=="object"){
-					temp = all_type[tag.toLowerCase()];
-					type = temp[element.getAttribute("type") || default_type[tag.toLowerCase()]];
-					if(element.getAttribute("type")==null)
-						element.setAttribute("type", default_type[tag.toLowerCase()]);
+class Drinks{
+	buildElement (element){
+		var tag = element.nodeName;
+			if(all_type[tag.toLowerCase()]){
+				if(element.getAttribute("resizable")=="true") 
+					attach(element, "dblclick", function(event){ResizeDrag(event);});
+	
+				if(have_parent(element) && !earr[element.id]){
+					var type;
+					if(typeof(all_type[tag.toLowerCase()])=="object"){
+						var temp = all_type[tag.toLowerCase()];
+						type = temp[element.getAttribute("type") || default_type[tag.toLowerCase()]];
+						if(element.getAttribute("type")==null)
+							element.setAttribute("type", default_type[tag.toLowerCase()]);
+					}
+					else
+						type = all_type[tag.toLowerCase()];
+					eval('earr[element.id] = new '+type+'(element)');
+					eval(element.id+'=earr[element.id];');
+					eval('if(drinks.'+tag.toLowerCase()+'s){drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}else{drinks.'+tag.toLowerCase()+'s=new Array(); drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}');
 				}
-				else
-					type = all_type[tag.toLowerCase()];
-				eval('earr[element.id] = new '+type+'(element)');
-				eval(element.id+'=earr[element.id];');
-				eval('if(Drinks.'+tag.toLowerCase()+'s){Drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}else{Drinks.'+tag.toLowerCase()+'s=new Array(); Drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}');
 			}
+	}
+	appendChild (id, element){
+		var parent = document.getElementById(id);
+		parent.appendChild(element);
+		drinks.buildElement(element);
+	}
+
+	ready (){
+		//invoked after all Drinks elements have been constructed
+	};		
+	
+	getElementById (id){
+		return earr[id];
+	}
+	
+	getElementsByName (n){
+		var arr = new Array();
+		for(var i in earr){
+			if(earr[i].name==n)
+				arr.push(earr[i]);
 		}
-}
+		return arr;
+	}
+	
+	getElementsByClassName (c) {
+		var arr = new Array();
+		for(var i in earr){
+			if(earr[i].className==c)
+				arr.push(earr[i]);
+		}
+		return arr;
+	}
+	
+	createElement (tag, obj){
+		var element = document.createElement(tag);
+		for(var i in obj){
+			if(i=="options"){
+				var opts = obj[i];
+				for(var j in opts){
+					var opt_el = drinks.createElement("option");
+					opt_el.setAttribute("value", opts[j].value);
+					opt_el.innerHTML = opts[j].inner;
+					element.appendChild(opt_el);			
+				}
+			}
+			else
+				element.setAttribute(i, obj[i]);
+		}
+		return element;
+	}
+	
+	removeElement (id){
+		for(var j in earr[id].inner)
+			drinks.removeElement(earr[id].inner[j].id);
+		eval("var temp=[]; for(var k in drinks."+earr[id].tagName+"s){if(drinks."+earr[id].tagName+"s[k].id!='"+id+"'){temp.push(drinks."+earr[id].tagName+"s[k]);}} drinks."+earr[id].tagName+"s = temp;");
+		earr[id].html.parentNode.removeChild(earr[id].html);
+		delete earr[id];	
+	}
+	
+	createManager (){
+		if(!drinks.managers)
+			drinks.managers = new Array();
+		var man = new Manager();	
+		drinks.managers.push(man);
+		return man;
+	}
+};
 
-Drinks.appendChild = function(id, element){
-	var parent = document.getElementById(id);
-	parent.appendChild(element);
-	Drinks.buildElement(element);
-}
-
-Drinks.ready = function(){};
+var drinks = new Drinks ();
 
 function initialize(){
 	var arr = document.getElementsByTagName("*");
 	var type;
 	var temp = {}
 	for(var i=0; i<arr.length; i++){
-		Drinks.buildElement(arr.item(i));
+		drinks.buildElement(arr.item(i));
 	}
-	Drinks.ready();
+	drinks.ready();
 	function render(){
 		for(var e in earr){
 			if(document.getElementById(e))
 				earr[e].render();
 			else
-				Drinks.removeElement(e);
+				drinks.removeElement(e);
 		}
 	}
 	setInterval(render, 100);	
 }
 
-Drinks.getElementById = function(id){
-	return earr[id];
-}
-
-Drinks.getElementsByName = function(n){
-	var arr = new Array();
-	for(var i in earr){
-		if(earr[i].name==n)
-			arr.push(earr[i]);
-	}
-	return arr;
-}
-
-Drinks.getElementsByClassName = function(c){
-	var arr = new Array();
-	for(var i in earr){
-		if(earr[i].className==c)
-			arr.push(earr[i]);
-	}
-	return arr;
-}
-
 function have_parent(el){
 	return all_type[el.parentNode.nodeName.toLowerCase()]==null;
 }
-
 
 function attach(element, type, fn){
     if (element.addEventListener){
@@ -343,41 +380,6 @@ function getRelativeCoordinates(event, reference) {
 	y = event.pageY - pos.y;
     	return { x: x, y: y };
   }
-
-
-Drinks.createElement = function(tag, obj){
-	var element = document.createElement(tag);
-	for(var i in obj){
-		if(i=="options"){
-			var opts = obj[i];
-			for(var j in opts){
-				var opt_el = Drinks.createElement("option");
-				opt_el.setAttribute("value", opts[j].value);
-				opt_el.innerHTML = opts[j].inner;
-				element.appendChild(opt_el);			
-			}
-		}
-		else
-			element.setAttribute(i, obj[i]);
-	}
-	return element;
-}
-
-Drinks.removeElement = function(id){
-	for(var j in earr[id].inner)
-		Drinks.removeElement(earr[id].inner[j].id);
-	eval("var temp=[]; for(var k in Drinks."+earr[id].tagName+"s){if(Drinks."+earr[id].tagName+"s[k].id!='"+id+"'){temp.push(Drinks."+earr[id].tagName+"s[k]);}} Drinks."+earr[id].tagName+"s = temp;");
-	earr[id].html.parentNode.removeChild(earr[id].html);
-	delete earr[id];	
-}
-
-Drinks.createManager = function(){
-	if(!Drinks.managers)
-		Drinks.managers = new Array();
-	var man = new Manager();	
-	Drinks.managers.push(man);
-	return man;
-}
 
 function Widget(element){
 	this.name=element.getAttribute("name") || null;
@@ -508,7 +510,7 @@ function Widget(element){
 				temp.appendChild(child_arr[k].html);
 			eval(el.id+" = temp;");
 			earr[el.id] = temp;
-			eval('if(Drinks.'+el_name.toLowerCase()+'s){Drinks.'+el_name.toLowerCase()+'s.push(earr[el.id]);}else{Drinks.'+el_name.toLowerCase()+'s=new Array(); Drinks.'+el_name.toLowerCase()+'s.push(earr[el.id]);}');
+			eval('if(drinks.'+el_name.toLowerCase()+'s){drinks.'+el_name.toLowerCase()+'s.push(earr[el.id]);}else{drinks.'+el_name.toLowerCase()+'s=new Array(); drinks.'+el_name.toLowerCase()+'s.push(earr[el.id]);}');
 		}	
 	}
 
@@ -627,7 +629,7 @@ function Instrument(element){
 function Manager(){
 	this.href="";
 	this.refresh=5;
-	var id = Drinks.managers.length || 0;
+	var id = drinks.managers.length || 0;
 	this.values = {};
 	this.input = null;
 	var ajax = new Ajax();
@@ -637,15 +639,15 @@ function Manager(){
 			var string = this.href+'?';
 			for(var i in this.input){
 				if(i < this.input.length-1){
-			      		string += this.input[i]+"="+encodeURIComponent(Drinks.getElementById(this.input[i]).value)+"&";
+			      		string += this.input[i]+"="+encodeURIComponent(drinks.getElementById(this.input[i]).value)+"&";
 		    		}else{
-		      			string += this.input[i]+"="+encodeURIComponent(Drinks.getElementById(this.input[i]).value);
+		      			string += this.input[i]+"="+encodeURIComponent(drinks.getElementById(this.input[i]).value);
 	    			}
 			}  		
 			ajax.load(string, null);
 		}else{
 			if(this.href && this.href!=""){
-				ajax.addCall("if(ajaxobj.responseText!=''){Drinks.managers["+id+"].values=JSON.parse(ajaxobj.responseText);}");
+				ajax.addCall("if(ajaxobj.responseText!=''){drinks.managers["+id+"].values=JSON.parse(ajaxobj.responseText);}");
 				ajax.load(this.href, null);
 				for(var i in this.values){
 					earr[i].value = this.values[i];
@@ -733,7 +735,7 @@ function Digital(element){
 		if(refer)
 			refer.appendChild(opt);
 		else
-			Drinks.appendChild(element.id, opt);
+			drinks.appendChild(element.id, opt);
 	}
 
 }

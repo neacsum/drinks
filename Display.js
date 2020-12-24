@@ -1810,13 +1810,13 @@ function GaugeAdv(element){
 	var resizable = element.getAttribute("resizable") || "false";
 	if(resizable=="true" || resizable==true)
 		element.setAttribute('ondblclick', 'ResizeDrag(null, earr[\''+parent_id+'\'].canvas)'); 
-	var gau = Drinks.createElement("display", {"id": parent_id+"gau", "min_range":min_range, "max_range":max_range, "range_from":range_from, "range_to":range_to, "style":style, "value":this.value, "radius":radius, "text":text});
+	var gau = drinks.createElement("display", {"id": parent_id+"gau", "min_range":min_range, "max_range":max_range, "range_from":range_from, "range_to":range_to, "style":style, "value":this.value, "radius":radius, "text":text});
 	this.appendChild(gau);
 
-	var disp = Drinks.createElement("display", {"id": parent_id+"dis", "type":"digital", "width":40*rx, "height":20*rx, "x":81*rx, "y":138*rx, "link":"true", "cipher": cipher, "significative":significative, "min_range":min_range, "max_range":max_range,});
+	var disp = drinks.createElement("display", {"id": parent_id+"dis", "type":"digital", "width":40*rx, "height":20*rx, "x":81*rx, "y":138*rx, "link":"true", "cipher": cipher, "significative":significative, "min_range":min_range, "max_range":max_range,});
 	this.inner[0].appendChild(disp);
 	
-	var ledd = Drinks.createElement("led", {"id":parent_id+"led", "radius":5*rx, "x":97*rx, "y":165*rx, "color":led_color});
+	var ledd = drinks.createElement("led", {"id":parent_id+"led", "radius":5*rx, "x":97*rx, "y":165*rx, "color":led_color});
 	this.inner[0].appendChild(ledd);
 	
 	this.inner[0].onalert=onalert;
