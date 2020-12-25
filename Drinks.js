@@ -188,9 +188,19 @@ function getElementsByAttribute(attr, value){
 	    }
     return arrReturnElements;
 }
-var all_type={"knob":{"loop":"LoopKnob", "analog":"EndedKnob", "digital":"DigitalKnob"}, "display":{"gauge":"Gauge", "7segments": "SevenSegmentsDisplay", "level": "LevelMeter", "thermo":"ThermoMeter", "analog":"VuMeter", "graph":"Graph"}, "led":{"round":"RoundLed", "rect":"RectLed", "triangle":"TriangleLed"}, "switch":{"rocker":"RockerSwitch", "arc":"ArcSwitch", "side":"SideSwitch", "circle": "CircleSwitch", "rect":"RectSwitch", "toggle":"ToggleSwitch"}, "oscope":"Oscilloscope", "slider":{"analog":"AnalogSlider", "digital":"DigitalSlider"}, "arcled":"ArcLed", "gaugeadv":"GaugeAdv","box":"Box","textbox":"TextBox","combobox":"ComboBox","buttonpress":"Button", "popip":"Popip"};
-var default_type={"knob":"loop", "display":"gauge", "led":"round", "switch":"toggle", "slider":"analog"};
-attach(window, 'load', loadDrinks);
+var all_type = {
+	"knob": { "loop": "LoopKnob", "analog": "EndedKnob", "digital": "DigitalKnob" },
+	"display": { "gauge": "Gauge", "7segments": "SevenSegmentsDisplay", "level": "LevelMeter", "thermo": "ThermoMeter", "analog": "VuMeter", "graph": "Graph" },
+	"led": { "round": "RoundLed", "rect": "RectLed", "triangle": "TriangleLed" },
+	"switch": { "rocker": "RockerSwitch", "arc": "ArcSwitch", "side": "SideSwitch", "circle": "CircleSwitch", "rect": "RectSwitch", "toggle": "ToggleSwitch" },
+	"oscope": "Oscilloscope",
+	"slider": { "analog": "AnalogSlider", "digital": "DigitalSlider" },
+	"arcled": "ArcLed",
+	"gaugeadv": "GaugeAdv",
+};
+
+var default_type= {"knob":"loop", "display":"gauge", "led":"round", "switch":"toggle", "slider":"analog"};
+window.addEventListener ('load', loadDrinks);
 
 var earr=new Array();
 
@@ -235,7 +245,7 @@ class Drinks{
 		var tag = element.nodeName;
 			if(all_type[tag.toLowerCase()]){
 				if(element.getAttribute("resizable")=="true") 
-					attach(element, "dblclick", function(event){ResizeDrag(event);});
+					element.addEventListener ("dblclick", (event) => { ResizeDrag(event); });
 	
 				if(have_parent(element) && !earr[element.id]){
 					var type;
@@ -248,8 +258,12 @@ class Drinks{
 					else
 						type = all_type[tag.toLowerCase()];
 					eval('earr[element.id] = new '+type+'(element)');
-					eval(element.id+'=earr[element.id];');
-					eval('if(drinks.'+tag.toLowerCase()+'s){drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}else{drinks.'+tag.toLowerCase()+'s=new Array(); drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}');
+					Object.defineProperty(window, element.id, {
+						value: earr[element.id], 
+						enumerable: true,
+						writable: true
+					});
+//					eval('if(drinks.'+tag.toLowerCase()+'s){drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}else{drinks.'+tag.toLowerCase()+'s=new Array(); drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}');
 				}
 			}
 	}
@@ -318,6 +332,15 @@ class Drinks{
 		drinks.managers.push(man);
 		return man;
 	}
+
+	static angle_normalize (angle) {
+		//normalize angle
+		while (angle < 0) {
+			angle += 360;
+		}
+		angle = angle % 360;
+		return angle;
+	}
 };
 
 var drinks = new Drinks ();
@@ -381,7 +404,7 @@ function getRelativeCoordinates(event, reference) {
     	return { x: x, y: y };
   }
 
-function Widget(element){
+function Instrument(element){
 	this.name=element.getAttribute("name") || null;
 	this.className=element.getAttribute("class") || null;
 	this.ajax = null;
@@ -404,71 +427,96 @@ function Widget(element){
 		element.appendChild(this.hidden);
 		element.removeAttribute("name");
 	}
-	this.width=parseFloat(element.getAttribute("width")) || element.style.width.replace("px","") || null;
 	this.height=parseFloat(element.getAttribute("height")) || element.style.height.replace("px","") || null;
 	this.parent = element.parent || null;
 	this.container = document.createElement('div');
-	this.container.setAttribute("style", "position:relative; width:"+this.width+"px; height:"+this.height+"px;");
-	if(this.parent){
-		element.setAttribute("style", "position:absolute; width:"+this.width+"px; height:"+this.height+"px;");
+	if (this.parent) {
+		element.setAttribute("style", "position:absolute; height:" + this.height + "px;");
 		element.appendChild(this.container);
 		this.parent.container.appendChild(element);
-	}else{
-		console.log("padre");
+	} else
 		element.appendChild(this.container);
-		this.labdiv;
-		this.__defineSetter__("label", function(label){
-			this._label = label;
-			if(label){
-				if(!this.labdiv){
-					this.labdiv = document.createElement("div");
-					this.labdiv.setAttribute("style", "float:left; min-height:20px; width:100%; padding-top:2px; background-color:white; border:1px solid silver; text-align:center;");
-					this.labdiv.innerHTML=label;
-					this.container.style.height = (this.height+parseInt(this.labdiv.style.offsetHeight))+'px';
-					this.container.appendChild(this.labdiv);
-				}
-				else{
-					this.labdiv.innerHTML=label;
-				}
-			}
-		});
-
-		this.__defineGetter__("label", function(){
-			return this._label;
-		});
-
-		this.label = element.getAttribute("label") || null;
-	}
 	this.html = element;
 	this.container.style.boxSizing="border-box";
 	this.x=0;
 	this.y=0;
 	this.ajax = new Ajax();
-     	
-	this.__defineSetter__("id", function(id){
-		var old_id = this._id;
-		this._id = id;		
-		eval("earr[id]= this;");
-		eval(id+"= this;");
-	});
-
-	this.__defineGetter__("id", function(){
-		return this._id;
-	});
-	this.id=element.getAttribute("id") || null;
-
-	this.__defineSetter__("rotate", function(rotate){
-		this._rotate = rotate;
-		var rotstyle="";
-		if(this.rotate)
-			rotstyle = "transform: rotate("+this.rotate+"deg); -ms-transform: rotate("+this.rotate+"deg); -webkit-transform: rotate("+this.rotate+"deg); -o-transform: rotate("+this.rotate+"deg); -moz-transform: rotate("+this.rotate+"deg); box-sizing:border-box; ";	
-		this.html.setAttribute("style", this.html.getAttribute("style")+rotstyle);
-	});
+	this._precision= element.getAttribute("precision") || "auto";
+	this.hide_grid = element.getAttribute("hide_grid")=="true" || false;
+	this.divisions = element.getAttribute ("divisions") || 100;
+	this.appendToContainer = function(item){
+		if(this.labdiv)
+			this.container.insertBefore(item, this.labdiv);
+		else
+			this.container.appendChild(item);
+	}
 	
-	this.__defineGetter__("rotate", function(){
-		return this._rotate;
-	 });
+	Object.defineProperty (this, 'rotate', {
+		set: (r) => {
+			this._rotate = r;
+			var rotstyle="";
+			if(r)
+				rotstyle = "transform: rotate("+r+"deg); box-sizing:border-box; ";	
+			this.html.setAttribute("style", this.html.getAttribute("style")+rotstyle);		
+		},
+		get: () => {return this._rotate}
+	});
+
+	Object.defineProperty (this, 'label',  {
+		set: (label)=>{
+			if (!this.parent && !this.labdiv && label) {
+				this.labdiv = document.createElement("div");
+				this.labdiv.setAttribute("style", "float:left; min-height:20px; width:100%; padding-top:2px; background-color:white; border:1px solid silver; text-align:center;");
+				this.labdiv.innerHTML=label;
+				this.container.style.height = (this.height+parseInt(this.labdiv.style.offsetHeight))+'px';
+				this.container.appendChild(this.labdiv);
+			}
+			if (this.labdiv)
+				this.labdiv.innerHTML = label;
+			this._label = label;
+		},
+		get: () => {return this._label}
+	});
+
+	Object.defineProperty (this, 'width',  {
+		set: (w) => {
+			this.canvas.width=w;
+			this._width = w;
+			this.container.style.width = w+'px';
+			this.html.style.width = w+'px';
+			this.html.setAttribute("width", w);				
+		},
+		get: () => {return this._width},
+		configurable: true
+	});
+
+	Object.defineProperty (this, 'precision', {
+		set: (prec) => {
+			if(precision=="auto")
+				this._precision = prec;
+			else
+				this._precision = Math.pow(10, prec);
+		},
+		get: () =>{
+			if(this._precision=="auto"){
+				var how = (this.max_range-this.min_range).toString();
+				var index = how.indexOf(".");
+				var cipher;
+				if(index>0)
+					cipher = how.length-index;
+				else if((this.min_range)/this.divisions<=1/10)
+					cipher = 1;
+				else
+					cipher = -1
+				this._precision = Math.pow(10, cipher);
+			}
+			return this._precision;	
+		}
+	});
+
+	this.id=element.getAttribute("id") || null;
 	this.rotate = element.getAttribute("rotate") || null;
+	this.label = element.getAttribute("label") || null;
 
 	this.appendChild = function(el){
 		var el_name = el.nodeName.toLowerCase();
@@ -519,24 +567,23 @@ function Widget(element){
 		this.appendChild(el);
 	}
 
-	var renderInner = function(){
-		var value = this.actual_value!=undefined?this.actual_value:this.value;
-		for(var i in this.inner){
-			if(this.pen){
-				this.pen.save();
-				this.pen.translate(this.inner[i].x, this.inner[i].y);
-				if(this.inner[i].html.getAttribute("link")=="true"){
-					this.inner[i].value=value;
-				}
-				this.inner[i].render();
-				this.pen.restore();
-			}
-			else
-				this.inner[i].render();
-		}
-	}.bind(this);
+	this.value = element.getAttribute("value")!=null?parseFloat(element.getAttribute("value")):(parseFloat(element.getAttribute("min_range")) || 0);
+	this.canvas = document.createElement('canvas');
+	this.pen = this.canvas.getContext('2d');
+	this.min_range=parseFloat(element.getAttribute("min_range")) || 0;
+	this.max_range=parseFloat(element.getAttribute("max_range")) || 100;
+	if(element.getAttribute("radius")){
+		this.width=parseInt(element.getAttribute("radius"))*2;
+		this.height = parseInt(element.getAttribute("radius"))*2;
+	}
+	else {
+		this.width=parseFloat(element.getAttribute("width")) || element.style.width.replace("px","") || null;
+	}
+	this.canvas.instrument = this;
+	this.canvas.setAttribute("style", "float:left;");
+	this.appendToContainer(this.canvas);
 
-	this.widgetCommonOperations = function(){
+	this.instrumentCommonOperations = function(){
 		if(first_time){
 			eval(this.onload);
 			first_time = false;
@@ -562,51 +609,12 @@ function Widget(element){
 		if(this.hidden)
 			this.hidden.value=this.value;
 		renderInner();
-		}
-
-	this.appendToContainer = function(item){
-		if(this.labdiv)
-			this.container.insertBefore(item, this.labdiv);
-		else
-			this.container.appendChild(item);
-	}
-}
-
-
-function Instrument(element){
-	Instrument.inherits(Widget);
-	Widget.call(this, element);
-
-	this.value = element.getAttribute("value")!=null?parseFloat(element.getAttribute("value")):(parseFloat(element.getAttribute("min_range")) || 0);
-	this.canvas = document.createElement('canvas');
-	this.pen = this.canvas.getContext('2d');
-	this.min_range=parseFloat(element.getAttribute("min_range")) || 0;
-	this.max_range=parseFloat(element.getAttribute("max_range")) || 100;
-	if(element.getAttribute("radius")){
-		this.width=parseInt(element.getAttribute("radius"))*2;
-		this.height = parseInt(element.getAttribute("radius"))*2;
-	}
-	this.canvas.width=this.width;
-	this.canvas.height=this.height;
-	this.canvas.instrument = this;
-	this.canvas.setAttribute("style", "float:left;");
-	this.appendToContainer(this.canvas);
-	this.instrumentCommonOperations = function(){
-		this.widgetCommonOperations();
 		if(this.displays && this.input){	
 			for(var d in this.displays){
 				if(this.displays[d].id)
 					eval(this.displays[d].id+'.value=this.value;');	
 			}		
 		}
-	}
-
-	this.setWidth = function(w){
-		this.canvas.width=w;
-		this.width = w;
-		this.container.style.width = this.width+'px';
-		this.html.style.width = this.width+'px';
-		this.html.setAttribute("width", this.width);		
 	}
 
 	this.setHeight = function(h){
@@ -624,6 +632,47 @@ function Instrument(element){
 		}
 	}
 
+	var renderInner = function(){
+		var value = this.actual_value!=undefined?this.actual_value:this.value;
+		for(var i in this.inner){
+			if(this.pen){
+				this.pen.save();
+				this.pen.translate(this.inner[i].x, this.inner[i].y);
+				if(this.inner[i].html.getAttribute("link")=="true"){
+					this.inner[i].value=value;
+				}
+				this.inner[i].render();
+				this.pen.restore();
+			}
+			else
+				this.inner[i].render();
+		}
+	}.bind(this);
+
+	this.loadOptions = function(element) {
+		var childs = element.childNodes;
+		this.options = new Array;
+		var nopt = 0;
+		this._selectedIndex = -1;
+		for (var i = 0; i < childs.length; i++) {
+			if (childs[i].nodeName.toLowerCase() == "option") {
+				this.options.push({
+					value: childs[i].getAttribute("value"),
+					inner: childs[i].innerHTML
+				});
+				if (childs[i].getAttribute("selected") != null) {
+					this._selectedIndex = nopt;
+					this._value = options[nopt].value;
+				}
+				element.removeChild (childs[i]);	
+				nopt++;				
+			}
+		}
+		if (this._selectedIndex == -1) {
+			this._selectedIndex = 0;
+			this._value = this.options[0].value;
+		}
+	}
 }
 
 function Manager(){
@@ -661,118 +710,6 @@ function Manager(){
 
 }
 
-function Analog(element){
-	this.hide_grid = element.getAttribute("hide_grid")=="true" || false;
-	this.divisions=100;
-
-	this.__defineSetter__("precision", function(precision){
-		if(precision=="auto")
-			this._precision = precision;
-		else	
-			this._precision = Math.pow(10, precision);
-	});	
-
-	this.__defineGetter__("precision", function(){
-		if(this._precision=="auto"){
-			var how = (this.max_range-this.min_range).toString();
-			var index = how.indexOf(".");
-			var cipher;
-			if(index>0)
-				cipher = how.length-index;
-			else if((this.min_range)/this.divisions<=1/10)
-				cipher = 1;
-			else
-				cipher = -1
-			this._precision = Math.pow(10, cipher);
-		}
-		return this._precision;
-	});
-	this.precision=element.getAttribute("precision") || "auto";
-
-	this.analogCommonOperations = function(){
-		
-	}
-}
-
-function Digital(element){
-	this.options=new Array();
-	this.selected=0;
-	this.values = new Array();
-	this.selectedIndex = 0;
-
-	this.digitalCommonOperations = function(){
-		
-	}
-	
-	this.loadOptions = function(refer){
-			var childs = element.childNodes;
-			var referaux = Array();
-			for(var i=0; i<childs.length; i++){
-				if(childs[i].nodeName.toLowerCase()=="option"){
-					this.options.push({value: childs[i].getAttribute("value"), inner:childs[i].innerHTML});
-						this.values[childs[i].getAttribute("value")]=this.options.length-1;
-					if(childs[i].getAttribute("selected")!=null)
-						this.selected = this.options.length-1;
-					if(refer)
-						referaux.push(childs[i]);					
-				}
-			}
-			for(var j in referaux)
-				refer.appendChild(referaux[j]);
-
-			if(this.options.length==0){
-				this.appendOption({value: "0", inner: "0"}, refer);
-				this.values["0"]=0;
-				this.selected = 0;
-			}
-	}
-
-	this.appendOption = function(obj, refer){
-		this.options.push(obj);
-		var opt = document.createElement("option");
-		opt.setAttribute("value", obj.value);
-		opt.innerHTML=obj.inner;
-		if(refer)
-			refer.appendChild(opt);
-		else
-			drinks.appendChild(element.id, opt);
-	}
-
-}
-
-function Input(element){
-
-	Input.inherits(Instrument);
-	Instrument.call(this, element);
-	this.displays = element.getAttribute('displays')!=null?getElementsByAttribute("display_name", element.getAttribute('displays')):null;
-	this.input=true;
-
-	this.__defineSetter__("displays", function(displays){
-		this._displays = getElementsByAttribute("display_name", displays);
-	});
-	
-	this.__defineGetter__("displays", function(){
-		return this._displays;
-	});
-
-	this.inputCommonOperations = function(){
-		this.instrumentCommonOperations();
-	};
-
-}
-
-function AnalogInput(element){
-	AnalogInput.inherits(Input);
-	Input.call(this, element);
-	AnalogInput.inherits(Analog);
-	Analog.call(this, element);
-
-	this.analogInputCommonOperations = function(){
-		this.inputCommonOperations();
-		this.analogCommonOperations();
-	}
-}
-
 function Binary(element){
 	this.min_range=0;
 	this.max_range=1;
@@ -795,31 +732,20 @@ function Binary(element){
 }
 
 function BinaryInput(element){
-	BinaryInput.inherits(Input);
-	Input.call(this, element);
+	BinaryInput.inherits(Instrument);
+	Instrument.call(this, element);
 	BinaryInput.inherits(Binary);
 	Binary.call(this, element);
 
 	this.binaryInputCommonOperations = function(){
-		this.inputCommonOperations();
+		this.instrumentCommonOperations();
 		this.binaryCommonOperations();
 	}
 }
 
-function DigitalInput(element){
-	DigitalInput.inherits(Input);
-	Input.call(this, element);
-	DigitalInput.inherits(Digital);
-	Digital.call(this, element);
-
-	this.digitalInputCommonOperations = function(){
-		this.inputCommonOperations();
-		this.digitalCommonOperations();
-	}
-
-}
-
 function MoveInput(element){
+	MoveInput.inherits(Instrument);
+	Instrument.call(this, element);
 	var drag=0;
 	var move=null;
 	this.x_root=0;
@@ -879,7 +805,6 @@ function MoveInput(element){
 		addEvents();
 	}
 
-
 	var mouseUp = function(event){	
 		if(drag){
 			var obj = getRelativeCoordinates(event, this.canvas);
@@ -916,41 +841,11 @@ function MoveInput(element){
 		if(this.click_func)
 			this.click_func();
 	}.bind(this);
-
-	this.moveInputCommonOperations = function(){
-	}
-
-}
-
-function Output(element){
-	Output.inherits(Instrument);
-	Instrument.call(this, element);
-	this.output=true;
-	this.display_name=element.getAttribute("display_name") || "";
-
-	this.outputCommonOperations=function(){
-		this.instrumentCommonOperations();
-	}
-	
-	this.__defineSetter__("display_name", function(display_name){
-		this._display_name = display_name;
-		element.setAttribute("display_name", display_name);
-		var elmts = getElementsByAttribute("displays", display_name);
-		for(var i in elmts){
-			eval(elmts[i].id+".displays=display_name");
-		}
-	});
-	
-	this.__defineGetter__("displays", function(){
-		return this._display_name;
-	});
 }
 
 function AnalogOutput(element){
-	AnalogOutput.inherits(Output);
-	Output.call(this, element);
-	AnalogOutput.inherits(Analog);
-	Analog.call(this, element);
+	AnalogOutput.inherits(Instrument);
+	Instrument.call(this, element);
 
 	this.autoscale=(element.getAttribute("autoscale")=="true") || false;
 	this.range_from = parseFloat(element.getAttribute('range_from'))==null?null:element.getAttribute('range_from');
@@ -960,8 +855,7 @@ function AnalogOutput(element){
  	var once_alert = false;
 
 	this.analogOutputCommonOperations = function(){
-		this.outputCommonOperations();
-		this.analogCommonOperations();
+		this.instrumentCommonOperations();
 
 		//Start Autoscale
 		if(this.value>this.max_range && (this.autoscale==true || this.autoscale=="true")){
@@ -1052,13 +946,13 @@ function ScaleOutput(element){
 }
 
 function BinaryOutput(element){
-	BinaryOutput.inherits(Output);
-	Output.call(this, element);
+	BinaryOutput.inherits(Instrument);
+	Instrument.call(this, element);
 	BinaryOutput.inherits(Binary);
 	Binary.call(this, element);
 
 	this.binaryOutputCommonOperations=function(){
-		this.outputCommonOperations();
+		this.instrumentCommonOperations();
 		this.binaryCommonOperations();
 	}
 }

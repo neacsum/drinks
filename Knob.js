@@ -41,7 +41,7 @@ function Knob(element){
 	var pen = this.pen;
 	this.rad = this.radius/100;
 	this.setHeight(this.radius*2+this.radius/2+120*this.rad);
-	this.setWidth(this.radius*2+this.radius/2+120*this.rad);
+	this.width = this.radius*2+this.radius/2+120*this.rad;
 	this.minus = this.radius/2+120*this.rad;
 
 	this.decx = this.width/2;
@@ -67,7 +67,7 @@ function Knob(element){
 		this._radius = radius;
 		this.rad = radius/100;
 		this.setHeight(radius*2+radius/2+120*this.rad);
-		this.setWidth(radius*2+radius/2+120*this.rad);
+		this.width = radius*2+radius/2+120*this.rad;
 		this.decx = this.width/2;
 		this.decy = this.height/2;
 		this.minus = radius/2+120*this.rad;
@@ -144,21 +144,14 @@ function Knob(element){
 		if(this.x_root>0 && this.y_root>0)
 			this.angle = 360 - (Math.asin( y /(75*this.rad)) * 180.0 / Math.PI);
 	}
-
-
-	this.knobCommonOperations = function(){
-		this.moveInputCommonOperations();
-	}.bind(this);
 }
 
 function DigitalKnob(element){
-
-	DigitalKnob.inherits(DigitalInput);
-	DigitalInput.call(this, element);
 	DigitalKnob.inherits(Knob);
 	Knob.call(this, element);
 	
 	var alpha_options=new Array();
+	this.values = new Array ();
 	var pen = this.pen;
 
 	this.move_func = function(){
@@ -169,7 +162,7 @@ function DigitalKnob(element){
 		this.flag = true;
 	};
 
-	this.loadOptions();
+	this.loadOptions(element);
 
 	var inc;
 	var drawGrid = function(){
@@ -260,14 +253,9 @@ function DigitalKnob(element){
 			return this._selectedIndex;
 	 });
 
-	this.selectedIndex = this.selected;
-
-	this.value = this.prec_value = element.getAttribute("value") || this.options[this.selectedIndex].value; 
-
 	this.render = function(){
 		this.canvas.width = this.canvas.width;
-		this.knobCommonOperations();
-		this.digitalInputCommonOperations();
+		this.instrumentCommonOperations();
 		drawGrid();
 		this.drawKnob();
 		if(this.flag)
@@ -275,22 +263,13 @@ function DigitalKnob(element){
 		this.value=this.value;
 		this.flag=false;
 		this.drawValue();
-		
 	}
 	
 }
 
 function AnalogKnob(element){
-	AnalogKnob.inherits(AnalogInput);
-	AnalogInput.call(this, element);
 	AnalogKnob.inherits(Knob);
 	Knob.call(this, element);
-
-	this.analogKnobCommonOperations = function(){
-		this.analogInputCommonOperations();
-		this.knobCommonOperations();
-	}
-	
 }
 
 function EndedKnob(element){
@@ -402,8 +381,6 @@ function EndedKnob(element){
 		this.drawValue();
 		this.analogKnobCommonOperations();	
 	}
-
-
 }
 
 
@@ -433,8 +410,7 @@ function LoopKnob(element){
 		if(old_angle != this.angle) old_angle = this.angle;
 
 		this.drawValue();
-		this.analogKnobCommonOperations();		
-
+		this.instrumentCommonOperations();		
 	}
 
 }

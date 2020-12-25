@@ -2,8 +2,25 @@
 <html>
     <head>
         <script src="Drinks.js"></script>
+        <script>
+        function upd_gau (v) {
+            gau.value = v;
+        }
+        </script>
     </head>
     <body>
-        <display id="gau" label="Gauge"></gauge>
+        <display id="gau" label="Gauge"></display>
+        <knob id="k1" onchange="upd_gau (this.value)" name="money"></knob>
+        <knob id="k2" type="digital" name="who">
+            <option value="good">Good</option>
+            <option value="bad">Bad</option>
+            <option value="ugly">Ugly</option>
+        </knob>
+        <slider id="s1" label="Analog Slider"></slider>
+        <slider id="sl1" type="digital" label="Digital Slider">
+            <option value="good">Very Good</option>
+            <option value="bad">Very Bad</option>
+            <option value="ugly">Very Ugly</option>
+        </slider>
     </body>
 </html>

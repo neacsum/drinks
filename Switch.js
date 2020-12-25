@@ -53,7 +53,7 @@ function RockerSwitch(element){
 
 	var pen = this.pen;
 	if(this.width==null)
-		this.setWidth(150);
+		this.width = 150;
 	if(this.height==null)
 		this.setHeight(200);
 	
@@ -319,7 +319,7 @@ function ArcSwitch(element){
 
 	var pen = this.pen;
 	if(this.width==null)
-		this.setWidth(70);
+		this.width = 70;
 	if(this.height==null)
 		this.setHeight(70);
 	var color; 
@@ -441,7 +441,7 @@ function SideSwitch(element){
 
 	var pen = this.pen;
 	if(this.width==null)
-		this.setWidth(100);
+		this.width = 100;
 	if(this.height==null)
 		this.setHeight(50);
 	this.hx = this.height/50;
@@ -584,7 +584,7 @@ function CircleSwitch(element){
 
 	var pen = this.pen;
 	if(this.width==null)
-		this.setWidth(100);
+		this.width = 100;
 	if(this.height==null)
 		this.setHeight(50);
 
@@ -703,7 +703,7 @@ function RectSwitch(element){
 
 	var pen = this.pen;
 	if(this.width==null)
-		this.setWidth(100);
+		this.width = 100;
 	if(this.height==null)
 		this.setHeight(50);
 
@@ -826,7 +826,7 @@ function ToggleSwitch(element){
 
 	var pen = this.pen;
 	if(this.width==null)
-		this.setWidth(60);
+		this.width = 60;
 	if(this.height==null)
 		this.setHeight(60);
 	this.hx = this.height/60;
@@ -999,12 +999,11 @@ function ArcLed(element){
 	ArcLed.inherits(Instrument);
 	Instrument.call(this, element);
 	
-	var width = element.getAttribute("width") || 70;
+	width = element.getAttribute("width") || 70;
 	var height = element.getAttribute("height") || 70;
 	var wx = width/70;
 	var hx = height/70;
 
-	this.setWidth(width);
 	this.setHeight(height);
 
 	var parent_id = element.id || "";

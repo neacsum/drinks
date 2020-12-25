@@ -41,14 +41,14 @@ function Slider(element){
 	this.topdown = element.getAttribute("topdown")=="true" || false;
 	if(this.align=="vertical"){
 		if(this.width==null)
-			this.setWidth(80);
+			this.width = 80;
 		if(this.height==null)
 			this.setHeight(300);
 	}else{
 		if(this.height==null)
 			this.setHeight(80);
 		if(this.width==null)
-			this.setWidth(300);
+			this.width = 300;
 	}
 	this.wv = this.width/80, this.hv = this.height/300;
 	this.wh = this.width/300, this.hh = this.height/80;
@@ -145,7 +145,7 @@ function Slider(element){
 			flag=true;
 			var h = this.height;
 			this.setHeight(this.width);
-			this.setWidth(h);	
+			this.width = h;	
 			if(this.height && this.width)
 				createGradients();
 			this.value=this.value;
@@ -156,9 +156,6 @@ function Slider(element){
 	 });
 
 	this.align = element.getAttribute("align") || "horizontal";
-	this.sliderCommonOperations = function(){
-		this.moveInputCommonOperations();
-	}.bind(this);
 
 	this.drawSlider = function(){
 		pen.fillStyle=grd2;
@@ -231,8 +228,6 @@ function Slider(element){
 }
 
 function AnalogSlider(element){ 
-	AnalogSlider.inherits(AnalogInput);
-	AnalogInput.call(this, element);
 	AnalogSlider.inherits(Slider);
 	Slider.call(this, element);
 	var pen = this.pen;
@@ -377,8 +372,6 @@ function AnalogSlider(element){
 
 	this.render = function(){
 		this.canvas.width = this.canvas.width;
-		this.analogInputCommonOperations();
-		this.sliderCommonOperations();
 		pen.save();
 		if(this.align=="vertical"){
 			pen.translate(this.canvas.width/2, 0);
@@ -400,91 +393,82 @@ function AnalogSlider(element){
 		this.drawCursor();
 		pen.restore();
 	}
-
 }
 
 function DigitalSlider(element){ 
 
-	DigitalSlider.inherits(DigitalInput);
-	DigitalInput.call(this, element);
 	DigitalSlider.inherits(Slider);
 	Slider.call(this, element);
+	this.selected = 0;
 	var pen = this.pen;
 	this.decx = 5*this.width/200;
 	this.decy = 5*this.height/200;
 	var coord_options=new Array();
+	this.values = new Array ();
 
-	this.loadOptions();
-
-	this.__defineSetter__("value", function(value){
-		if(!this.f){
-			this.f=true;
-			if(this.values[value] || this.values[value]==0){
-				this._value = value;
-				if(this.align=="vertical")
-					this.y_root = coord_options[this.values[value]]-5*this.hv;
-				else				
-					this.x_root = coord_options[this.values[value]]-5*this.wh;
-				this.selectedIndex = this.values[value];	
+	this.loadOptions(element);
+	Object.defineProperty (this, 'value', {
+		set: (value) => {
+			if(!this.f){
+				this.f=true;
+				if(this.values[value] || this.values[value]==0){
+					this._value = value;
+					if(this.align=="vertical")
+						this.y_root = coord_options[this.values[value]]-5*this.hv;
+					else				
+						this.x_root = coord_options[this.values[value]]-5*this.wh;
+					this.selectedIndex = this.values[value];	
+				}
+				this.f=false;
 			}
-			this.f=false;
-		}
-	});	
-
-	this.__defineGetter__("value", function(){
-			return this._value;
-	 });
-
-	this.__defineSetter__("selectedIndex", function(selectedIndex){
-			this._selectedIndex = selectedIndex;	
-			this.value = this.options[selectedIndex].value;
+	
+		},
+		get: () => {return this._value}
 	});
-
-	this.__defineGetter__("selectedIndex", function(){
-			return this._selectedIndex;
-	 });
+	Object.defineProperty (this, 'selectedIndex', {
+		set: (idx) => {
+			this._selectedIndex = idx;	
+			this.value = this.options[idx].value;
+		},
+		get: () => {return this._selectedIndex}		
+	})
 
 	var inc, next;
-	var load = function(){
-		if(this.align=="vertical"){
-			inc = (this.height-20*this.hv)/(this.options.length-1);
-			if(!this.topdown || this.topdown=="false")
-				next= 10*this.hv;
-			else
-				next= this.height-10*this.hv;
+	if(this.align=="vertical"){
+		inc = (this.height-20*this.hv)/(this.options.length-1);
+		if(!this.topdown || this.topdown=="false")
+			next= 10*this.hv;
+		else
+			next= this.height-10*this.hv;
+	}
+	else{
+		inc = (this.width-20*this.wh)/(this.options.length-1);
+		if(!this.topdown || this.topdown=="false")
+			next = 10*this.wh;
+		else
+			next = this.width-10*this.wh;
+	}
+	pen.save();	
+
+	for(var i in this.options){
+		if(!this.topdown || this.topdown=="false"){
+			if(i!=0)
+				next +=inc;
 		}
 		else{
-			inc = (this.width-20*this.wh)/(this.options.length-1);
-			if(!this.topdown || this.topdown=="false")
-				next = 10*this.wh;
-			else
-				next = this.width-10*this.wh;
+			if(i!=0)
+				next -=inc;
 		}
-		pen.save();	
+		coord_options[i] = next;
+		this.values[this.options[i].value]=i;
+	}
+	pen.restore();	
 
-		for(var i in this.options){
-			if(!this.topdown || this.topdown=="false"){
-				if(i!=0)
-					next +=inc;
-			}
-			else{
-				if(i!=0)
-					next -=inc;
-			}
-			coord_options[i] = next;
-			this.values[this.options[i].value]=i;
-		}
-		if(!move)
-			this.value = this.value;
-		pen.restore();	
-	}.bind(this);
-	load();
 	this.selectedIndex = this.selected;
 
 	this.value = this.prec_value = element.getAttribute("value") || this.options[this.selectedIndex].value; 
 
 	var drawGrid = function(){
-		load();
 		pen.save();	
 		if(this.align=="vertical")
 			pen.translate(-10*this.wv, 0);
@@ -492,8 +476,9 @@ function DigitalSlider(element){
 			pen.translate(0, -10*this.hh);
 		pen.fillStyle="#333";
 		pen.strokeStyle="#333";
+		pen.font = 'normal bolder '
+			+ ((this.align=='vertical')?this.width : this.height)*(1/8)+'px sans'
 		if(this.align=="vertical"){
-			pen.font='normal'+' '+'bolder'+' '+(this.width*(1/8))+'px'+' '+'sans';
 			for(var i in this.options){
 				pen.beginPath();
 				pen.moveTo(15*this.wv, coord_options[i]);
@@ -543,8 +528,6 @@ function DigitalSlider(element){
 
 	this.render = function(){
 		this.canvas.width = this.canvas.width;
-		this.digitalInputCommonOperations();
-		this.sliderCommonOperations();
 		pen.save();
 		if(this.align=="vertical"){
 			pen.translate(this.width/2, 0);
