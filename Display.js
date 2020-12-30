@@ -37,7 +37,7 @@ function Gauge(element){
 	var pen = this.pen;
 	this.radius = element.getAttribute("radius") || 100;
 	this.rx = this.radius/100;
-	this.setHeight(this.radius*2);
+	this.height = this.radius*2;
 
 	var main_grd, grd, grd_text, grd2, grd3;
 	var createGradients = function(){
@@ -147,7 +147,7 @@ function Gauge(element){
 	this.__defineSetter__("radius", function(radius){
 		this._radius = radius;
 		this.rx = radius/100;
-		this.setHeight(radius*2);
+		this.height = radius*2;
 		this.width = radius*2;
 		if(this.radius)
 			createGradients();
@@ -226,7 +226,7 @@ function VuMeter(element){
 	if(this.width==null)	
 		this.width = 300;
 	if(this.height==null)	
-		this.setHeight(180);
+		this.height = 180;
 	this.wx = this.width/300;
 	this.hx = this.height/180;
 	var grd, grd2;
@@ -437,7 +437,7 @@ function SevenSegmentsDisplay(element){
 	if(this.width==null)
 		this.width = 100*this.cipher;		
 	if(this.height==null)
-		this.setHeight(50*this.cipher);
+		this.height = 50*this.cipher;
 	var comma = null;
 	var negative = false;
 	var width = (this.width-20*this.width/150)/this.cipher;
@@ -660,13 +660,13 @@ function LevelMeter(element){
 		if(this.width==null)
 			this.width = 100;
 		if(this.height==null)
-			this.setHeight(220);
+			this.height = 220;
 	}
 	else{
 		if(this.width==null)
 			this.width = 220;
 		if(this.height==null)
-			this.setHeight(100);
+			this.height = 100;
 	}
 	this.wv= this.width/100;
 	this.hh= this.height/100;
@@ -858,7 +858,7 @@ function LevelMeter(element){
 		this._align = align;
 		if((align=="vertical" && this.width>this.height) || (align=="horizontal" && this.height>this.width)){
 			var h = this.height;
-			this.setHeight(this.width);
+			this.height = this.width;
 			this.width = h;
 			if(this.height && this.width)
 				createGradients();
@@ -912,13 +912,13 @@ function ThermoMeter(element){
 		if(this.width==null)
 			this.width = 100;
 		if(this.height==null)
-			this.setHeight(220);
+			this.height = 220;
 	}
 	else{
 		if(this.width==null)
 			this.width = 220;
 		if(this.height==null)
-			this.setHeight(100);
+			this.height = 100;
 	}
 	this.wv= this.width/100;
 	this.hh= this.height/100;
@@ -1165,7 +1165,7 @@ function ThermoMeter(element){
 		this._align = align;
 		if((align=="vertical" && this.width>this.height) || (align=="horizontal" && this.height>this.width)){
 			var h = this.height;
-			this.setHeight(this.width);
+			this.height = this.width;
 			this.width = h;
 
 			if(align=="vertical")
@@ -1220,7 +1220,7 @@ function Graph(element){
 	if(this.width==null)
 		this.width = 450;
 	if(this.height==null)
-		this.setHeight(300);
+		this.height = 300;
 	var canvas = new Array(3);
 	canvas[0] = this.canvas;
 	canvas[0].setAttribute("id", "first");
@@ -1789,7 +1789,7 @@ function GaugeAdv(element){
 	var radius = element.getAttribute("radius") || 100;
 	var rx = radius/100;
 	this.width = radius*2;
-	this.setHeight(radius*2);
+	this.height = radius*2;
 
 	var style = element.getAttribute("style") || ""; 
 	var led_color = element.getAttribute("led_color") || ""; 

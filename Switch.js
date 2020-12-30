@@ -55,7 +55,7 @@ function RockerSwitch(element){
 	if(this.width==null)
 		this.width = 150;
 	if(this.height==null)
-		this.setHeight(200);
+		this.height = 200;
 	
 	var grd, grd2, grd3, grd4, grd5, grd6, main_grd;
 	this.wx = this.width/150;
@@ -321,7 +321,7 @@ function ArcSwitch(element){
 	if(this.width==null)
 		this.width = 70;
 	if(this.height==null)
-		this.setHeight(70);
+		this.height = 70;
 	var color; 
 	var shadow;
 	var border;
@@ -443,7 +443,7 @@ function SideSwitch(element){
 	if(this.width==null)
 		this.width = 100;
 	if(this.height==null)
-		this.setHeight(50);
+		this.height = 50;
 	this.hx = this.height/50;
 	this.wx = this.width/100;
 
@@ -586,7 +586,7 @@ function CircleSwitch(element){
 	if(this.width==null)
 		this.width = 100;
 	if(this.height==null)
-		this.setHeight(50);
+		this.height = 50;
 
 	this.wx = this.width/100;
 	this.hx = this.height/50;
@@ -705,7 +705,7 @@ function RectSwitch(element){
 	if(this.width==null)
 		this.width = 100;
 	if(this.height==null)
-		this.setHeight(50);
+		this.height = 50;
 
 	var grd, grd1;
 	var color;
@@ -828,7 +828,7 @@ function ToggleSwitch(element){
 	if(this.width==null)
 		this.width = 60;
 	if(this.height==null)
-		this.setHeight(60);
+		this.height = 60;
 	this.hx = this.height/60;
 	this.wx = this.width/60;		
 	var main_grd, grd, grd2, grd3, grd4, grd5;
@@ -1000,11 +1000,9 @@ function ArcLed(element){
 	Instrument.call(this, element);
 	
 	width = element.getAttribute("width") || 70;
-	var height = element.getAttribute("height") || 70;
+	height = element.getAttribute("height") || 70;
 	var wx = width/70;
 	var hx = height/70;
-
-	this.setHeight(height);
 
 	var parent_id = element.id || "";
 	var style = element.getAttribute("style") || "";	
@@ -1012,7 +1010,6 @@ function ArcLed(element){
 	var rotate = element.getAttribute("rotate") || "270";
 	var color = element.getAttribute("color") || "lawngreen";
 	
-
 	var swel = drinks.createElement("switch");	
 	swel.setAttribute("id", parent_id+'sw');
 	swel.setAttribute("type", "arc");

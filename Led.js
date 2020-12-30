@@ -71,7 +71,7 @@ function RoundLed(element){
 	this.radius=parseInt(element.getAttribute("radius")) || 10;
 	var pen = this.pen;
 	var rad = this.radius/100;
-	this.setHeight(this.radius*2);
+	this.height = this.radius*2;
 	this.width = this.radius*2;
 	var arcdim = (this.radius*4/5-10*rad);
 	var grd_on, grd_off;
@@ -102,7 +102,7 @@ function RoundLed(element){
 
 	this.__defineSetter__("radius", function(radius){
 		this._radius = radius;
-		this.setHeight(this.radius*2);
+		this.height = this.radius*2;
 		this.width = this.radius*2;
 		arcdim = (radius*4/5-10*rad);		
 		if(this.height && this.width)
@@ -132,7 +132,7 @@ function RectLed(element){
 	if(this.width==null)
 		this.width = 100;
 	if(this.height==null)
-		this.setHeight(60);	
+		this.height = 60;	
 	var w = this.width/100;
 	var h = this.height/60;
 	var grd_on, grd_off, grd_bord;
@@ -218,7 +218,7 @@ function TriangleLed(element){
 	if(this.width==null)
 		this.width = 60;
 	if(this.height==null)
-		this.setHeight(60);	
+		this.height = 60;	
 	var w = this.width/60;
 	var h = this.height/60;
 

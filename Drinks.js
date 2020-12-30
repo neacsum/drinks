@@ -412,10 +412,8 @@ function Instrument(element){
 	this.value = element.getAttribute("value");
 	this.tagName = element.nodeName.toLowerCase();
 	this.inner = new Array();
-	this.onload=element.getAttribute("onload") || null;
 	this.onchange=element.getAttribute("onchange") || null;
 	this.style=element.getAttribute("style") || null;
-	var first_time = true;
 	this.prec_value = this.value;
 	this.refresh = parseInt(element.getAttribute("refresh")) || 5;
 	this.type = element.getAttribute("type") || null;
@@ -487,6 +485,25 @@ function Instrument(element){
 			this.html.setAttribute("width", w);				
 		},
 		get: () => {return this._width},
+		configurable: true
+	});
+
+	Object.defineProperty (this, 'height', {
+		set: (h) => {
+			this.canvas.height=h;
+			this._height = h;
+			if(this.label){
+				this.container.style.height = (h+parseInt(this.labdiv.clientHeight))+'px';
+				this.html.setAttribute("height", (h+parseInt(this.labdiv.clientHeight)));		
+				this.html.style.height = (h+parseInt(this.labdiv.style.clientHeight))+"px";		
+			}
+			else{
+				this.container.style.height = h+'px';
+				this.html.setAttribute("height", h);		
+				this.html.style.height = h+"px";		
+			}	
+		},
+		get: () => {return this._height},
 		configurable: true
 	});
 
@@ -584,10 +601,6 @@ function Instrument(element){
 	this.appendToContainer(this.canvas);
 
 	this.instrumentCommonOperations = function(){
-		if(first_time){
-			eval(this.onload);
-			first_time = false;
-		}
 		if(this.href){
 			if(refresh_time>=this.refresh){
 				if(this.output){
@@ -614,21 +627,6 @@ function Instrument(element){
 				if(this.displays[d].id)
 					eval(this.displays[d].id+'.value=this.value;');	
 			}		
-		}
-	}
-
-	this.setHeight = function(h){
-		this.canvas.height=h;
-		this.height = h;
-		if(this.label){
-			this.container.style.height = (this.height+parseInt(this.labdiv.clientHeight))+'px';
-			this.html.setAttribute("height", (this.height+parseInt(this.labdiv.clientHeight)));		
-			this.html.style.height = (this.height+parseInt(this.labdiv.style.clientHeight))+"px";		
-		}
-		else{
-			this.container.style.height = this.height+'px';
-			this.html.setAttribute("height", this.height);		
-			this.html.style.height = this.height+"px";		
 		}
 	}
 

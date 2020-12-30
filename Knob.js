@@ -40,7 +40,7 @@ function Knob(element){
 	var y=0;
 	var pen = this.pen;
 	this.rad = this.radius/100;
-	this.setHeight(this.radius*2+this.radius/2+120*this.rad);
+	this.height = this.radius*2+this.radius/2+120*this.rad;
 	this.width = this.radius*2+this.radius/2+120*this.rad;
 	this.minus = this.radius/2+120*this.rad;
 
@@ -66,7 +66,7 @@ function Knob(element){
 	this.__defineSetter__("radius", function(radius){
 		this._radius = radius;
 		this.rad = radius/100;
-		this.setHeight(radius*2+radius/2+120*this.rad);
+		this.height = radius*2+radius/2+120*this.rad;
 		this.width = radius*2+radius/2+120*this.rad;
 		this.decx = this.width/2;
 		this.decy = this.height/2;

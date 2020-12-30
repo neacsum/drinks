@@ -43,10 +43,10 @@ function Slider(element){
 		if(this.width==null)
 			this.width = 80;
 		if(this.height==null)
-			this.setHeight(300);
+			this.height = 300;
 	}else{
 		if(this.height==null)
-			this.setHeight(80);
+			this.height = 80;
 		if(this.width==null)
 			this.width = 300;
 	}
@@ -144,7 +144,7 @@ function Slider(element){
 		if((align=="vertical" && this.width>this.height) || (align=="horizontal" && this.height>this.width)){
 			flag=true;
 			var h = this.height;
-			this.setHeight(this.width);
+			this.height = this.width;
 			this.width = h;	
 			if(this.height && this.width)
 				createGradients();
