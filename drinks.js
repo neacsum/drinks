@@ -32,26 +32,9 @@
 
 function Ajax(){
 
-	var ajaxobj = null;
+	var ajaxobj = new XMLHttpRequest();
 	var loader = null;
 	var calls = new Array();
-	
-	var init = function(){
-		var XHR = null;
-			browser = navigator.userAgent.toUpperCase();
-
-			if(typeof(XMLHttpRequest) === "function" || typeof(XMLHttpRequest) === "object")
-				XHR = new XMLHttpRequest();
-			else if(window.ActiveXObject && browser.indexOf("MSIE 4") < 0) {
-		 		if(browser.indexOf("MSIE 5") < 0)
-					XHR = new ActiveXObject("Msxml2.XMLHTTP");
-				else
-					XHR = new ActiveXObject("Microsoft.XMLHTTP");
-			}
-
-			 ajaxobj = XHR;
-	}
-	init();
 
 	this.setLoader = function(src){
 		loader = src;	
@@ -119,8 +102,6 @@ function Ajax(){
 
 
 }
-
-//var ajax = new Ajax();
 
 function reloadDrinks(){
 	var arr = document.getElementsByTagName("*");
@@ -264,7 +245,6 @@ class Drinks{
 						enumerable: true,
 						writable: true
 					});
-//					eval('if(drinks.'+tag.toLowerCase()+'s){drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}else{drinks.'+tag.toLowerCase()+'s=new Array(); drinks.'+tag.toLowerCase()+'s.push(earr[element.id]);}');
 				}
 			}
 	}
@@ -346,7 +326,7 @@ class Drinks{
 		return angle;
 	}
 	//list of Drinks modules
-	static modules = ['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'];
+	static modules = ['display.js', 'knob.js', 'led.js', 'switch.js', 'slider.js'];
 };
 
 var drinks = new Drinks ();
@@ -458,85 +438,84 @@ function Instrument(element){
 			this.container.appendChild(item);
 	}
 	
-	Object.defineProperty (this, 'rotate', {
-		set: (r) => {
-			this._rotate = r;
-			var rotstyle="";
-			if(r)
-				rotstyle = "transform: rotate("+r+"deg); box-sizing:border-box; ";	
-			this.html.setAttribute("style", this.html.getAttribute("style")+rotstyle);		
+	Object.defineProperties (this, {
+		'rotate': {
+			set: (r) => {
+				this._rotate = r;
+				var rotstyle = "";
+				if (r)
+					rotstyle = "transform: rotate(" + r + "deg); box-sizing:border-box; ";
+				this.html.setAttribute("style", this.html.getAttribute("style") + rotstyle);
+			},
+			get: () => { return this._rotate }
 		},
-		get: () => {return this._rotate}
-	});
-
-	Object.defineProperty (this, 'label',  {
-		set: (label)=>{
-			if (!this.parent && !this.labdiv && label) {
-				this.labdiv = document.createElement("div");
-				this.labdiv.setAttribute("style", "float:left; min-height:20px; width:100%; padding-top:2px; background-color:white; border:1px solid silver; text-align:center;");
-				this.labdiv.innerHTML=label;
-				this.container.style.height = (this.height+parseInt(this.labdiv.style.offsetHeight))+'px';
-				this.container.appendChild(this.labdiv);
-			}
-			if (this.labdiv)
-				this.labdiv.innerHTML = label;
-			this._label = label;
+		'label': {
+			set: (label)=>{
+				if (!this.parent && !this.labdiv && label) {
+					this.labdiv = document.createElement("div");
+					this.labdiv.setAttribute("style", "float:left; min-height:20px; width:100%; padding-top:2px; background-color:white; border:1px solid silver; text-align:center;");
+					this.labdiv.innerHTML=label;
+					this.container.style.height = (this.height+parseInt(this.labdiv.style.offsetHeight))+'px';
+					this.container.appendChild(this.labdiv);
+				}
+				if (this.labdiv)
+					this.labdiv.innerHTML = label;
+				this._label = label;
+			},
+			get: () => {return this._label},
+			configurable: true
 		},
-		get: () => {return this._label}
-	});
-
-	Object.defineProperty (this, 'width',  {
-		set: (w) => {
-			this.canvas.width=w;
-			this._width = w;
-			this.container.style.width = w+'px';
-			this.html.style.width = w+'px';
-			this.html.setAttribute("width", w);				
+		'width': {
+			set: (w) => {
+				this.canvas.width=w;
+				this._width = w;
+				this.container.style.width = w+'px';
+				this.html.style.width = w+'px';
+				this.html.setAttribute("width", w);				
+			},
+			get: () => {return this._width},
+			configurable: true	
 		},
-		get: () => {return this._width},
-		configurable: true
-	});
-
-	Object.defineProperty (this, 'height', {
-		set: (h) => {
-			this.canvas.height=h;
-			this._height = h;
-			if(this.label){
-				this.container.style.height = (h+parseInt(this.labdiv.clientHeight))+'px';
-				this.html.setAttribute("height", (h+parseInt(this.labdiv.clientHeight)));		
-				this.html.style.height = (h+parseInt(this.labdiv.style.clientHeight))+"px";		
-			}
-			else{
-				this.container.style.height = h+'px';
-				this.html.setAttribute("height", h);		
-				this.html.style.height = h+"px";		
-			}	
+		'height': {
+			set: (h) => {
+				this.canvas.height=h;
+				this._height = h;
+				if(this.label){
+					this.container.style.height = (h+parseInt(this.labdiv.clientHeight))+'px';
+					this.html.setAttribute("height", (h+parseInt(this.labdiv.clientHeight)));		
+					this.html.style.height = (h+parseInt(this.labdiv.style.clientHeight))+"px";		
+				}
+				else{
+					this.container.style.height = h+'px';
+					this.html.setAttribute("height", h);		
+					this.html.style.height = h+"px";		
+				}	
+			},
+			get: () => {return this._height},
+			configurable: true	
 		},
-		get: () => {return this._height},
-		configurable: true
-	});
-
-	Object.defineProperty (this, 'precision', {
-		set: (prec) => {
-			if(precision=="auto")
-				this._precision = prec;
-			else
-				this._precision = Math.pow(10, prec);
-		},
-		get: () =>{
-			if(this._precision=="auto"){
-				var how = (this.max_range-this.min_range).toString();
-				var index = how.indexOf(".");
-				var cipher;
-				if(index>0)
-					cipher = how.length-index;
-				else if((this.min_range)/this.divisions<=1/10)
-					cipher = 1;
+		'precision': {
+			set: (prec) => {
+				if(precision=="auto")
+					this._precision = prec;
 				else
-					cipher = -1
-				this._precision = Math.pow(10, cipher);
-			}
-			return this._precision;	
+					this._precision = Math.pow(10, prec);
+			},
+			get: () =>{
+				if(this._precision=="auto"){
+					var how = (this.max_range-this.min_range).toString();
+					var index = how.indexOf(".");
+					var cipher;
+					if(index>0)
+						cipher = how.length-index;
+					else if((this.min_range)/this.divisions<=1/10)
+						cipher = 1;
+					else
+						cipher = -1
+					this._precision = Math.pow(10, cipher);
+				}
+				return this._precision;	
+			}	
 		}
 	});
 
@@ -584,7 +563,6 @@ function Instrument(element){
 				temp.appendChild(child_arr[k].html);
 			eval(el.id+" = temp;");
 			earr[el.id] = temp;
-			eval('if(drinks.'+el_name.toLowerCase()+'s){drinks.'+el_name.toLowerCase()+'s.push(earr[el.id]);}else{drinks.'+el_name.toLowerCase()+'s=new Array(); drinks.'+el_name.toLowerCase()+'s.push(earr[el.id]);}');
 		}	
 	}
 

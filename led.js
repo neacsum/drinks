@@ -36,15 +36,14 @@ function Led(element){
 	this.blink=parseFloat(element.getAttribute("blink")) || null;
 	this.blinktimer=0;
 
-	this.__defineSetter__("color", function(color){
-		this._color = color;
-		if(this.height && this.width && this.createGradients)
-			this.createGradients();
+	Object.defineProperty (this, 'color', {
+		set: (color) => {
+			this._color = color;
+			if(this.height && this.width && this.createGradients)
+				this.createGradients();	
+		},
+		get: () => {return this._color}
 	});
-
-	this.__defineGetter__("color", function(){
-		return this._color;
-	 });
 
 	this.color = element.getAttribute("color") || "lawngreen";
 
@@ -68,7 +67,18 @@ function Led(element){
 function RoundLed(element){	
 	RoundLed.inherits(Led);
 	Led.call(this, element);
-	this.radius=parseInt(element.getAttribute("radius")) || 10;
+	this._radius=parseInt(element.getAttribute("radius")) || 10;
+	Object.defineProperty (this, 'radius', {
+		set: (radius) => {
+			this._radius = radius;
+			this.height = this.radius*2;
+			this.width = this.radius*2;
+			arcdim = (radius*4/5-10*rad);		
+			if(this.height && this.width)
+				this.createGradients();	
+		},
+		get: () => {return this._radius}
+	})
 	var pen = this.pen;
 	var rad = this.radius/100;
 	this.height = this.radius*2;
@@ -83,7 +93,7 @@ function RoundLed(element){
 		grd_off.addColorStop(0, '#aaa');
 		grd_off.addColorStop(0.9, '#525367');
 	}
-	this.createGradients();
+	this.createGradients ();
 
 	var drawLed = function(){
 		pen.beginPath();
@@ -100,20 +110,6 @@ function RoundLed(element){
 		pen.fill();
 	}.bind(this);
 
-	this.__defineSetter__("radius", function(radius){
-		this._radius = radius;
-		this.height = this.radius*2;
-		this.width = this.radius*2;
-		arcdim = (radius*4/5-10*rad);		
-		if(this.height && this.width)
-			this.createGradients();
-	});
-
-	this.__defineGetter__("radius", function(){
-		return this._radius;
-	 });
-	this.radius = parseInt(element.getAttribute("radius")) || 10;
-
 	this.render = function(){
 		this.canvas.width=this.canvas.width;
 		this.ledCommonOperations();
@@ -125,7 +121,8 @@ function RoundLed(element){
 }
 
 function RectLed(element){	
-
+	this._text = element.innerText;
+	element.innerText = "";
 	RectLed.inherits(Led);
 	Led.call(this, element);
 	var pen = this.pen;
@@ -168,33 +165,40 @@ function RectLed(element){
 		pen.roundRect(-this.width/2+5*w, -this.height/2+5*h, this.width-10*w, this.height-10*h, 2*w);
 		pen.stroke();
 		pen.fill();
+		if (this._text) {
+			pen.font = 'bold ' + (this.height/2) + 'px Helvetica';
+			pen.fillStyle = 'black';
+			pen.textAlign = 'center';
+			pen.textBaseline = 'middle';
+			pen.fillText (this._text, 0, 0);
+		}
 	}.bind(this);
 
-	this.__defineSetter__("width", function(width){
-		this._width = width;
-		this.canvas.width=width;
-		this.container.style.width = width+'px';
-		w = width/100;
-		if(this.height && this.width)
-			this.createGradients();
-	});
+	Object.defineProperties (this, {
+		'width': {
+			set: (width) => {
+				this._width = width;
+				this.canvas.width=width;
+				this.container.style.width = width+'px';
+				w = width/100;
+				if(this.height && this.width)
+					this.createGradients();		
+			},
+			get: () => {return this._width}
+		},
+		'height': {
+			set: (height) => {
+				this._height = height;
+				this.canvas.height=height;
+				this.container.style.height = height+'px';
+				h = height/60;
+				if(this.height && this.width)
+					this.createGradients();		
+			},
+			get: () => {return this._height}
+		}
 
-	this.__defineGetter__("width", function(){
-		return this._width;
-	 });
-
-	this.__defineSetter__("height", function(height){
-		this._height = height;
-		this.canvas.height=height;
-		this.container.style.height = height+'px';
-		h = height/60;
-		if(this.height && this.width)
-			this.createGradients();
-	});
-	
-	this.__defineGetter__("height", function(){
-		return this._height;
-	 });
+	})
 
 	this.width = this.canvas.width;
 	this.height = this.canvas.height;
