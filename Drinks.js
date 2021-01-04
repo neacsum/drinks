@@ -227,6 +227,7 @@ var includeJS = (function(){
 	});
 })();
 
+// Load all Drinks modules
 function loadDrinks(){
 	var sarr = document.getElementsByTagName('script');
 	var path = "";
@@ -236,8 +237,8 @@ function loadDrinks(){
 			path = sarr[i].src.substr(0, index);
 		}
 	}
-	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'], path, initialize);
-//	includeJS(['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js', 'ResizeDrag.js','HTMLexpansions.js'], path, initialize);
+	Drinks.preload (); //called before modules are loaded
+	includeJS(Drinks.modules, path, initialize);
 }
 
 class Drinks{
@@ -273,7 +274,10 @@ class Drinks{
 		drinks.buildElement(element);
 	}
 
-	ready (){
+	static preload () {
+		//invoked before loading Drinks scripts and building elements
+	}
+	static ready (){
 		//invoked after all Drinks elements have been constructed
 	};		
 	
@@ -326,10 +330,10 @@ class Drinks{
 	}
 	
 	createManager (){
-		if(!drinks.managers)
-			drinks.managers = new Array();
+		if(!this.managers)
+			this.managers = new Array();
 		var man = new Manager();	
-		drinks.managers.push(man);
+		this.managers.push(man);
 		return man;
 	}
 
@@ -341,27 +345,32 @@ class Drinks{
 		angle = angle % 360;
 		return angle;
 	}
+	//list of Drinks modules
+	static modules = ['Display.js', 'Knob.js', 'Led.js', 'Switch.js', 'Slider.js'];
 };
 
 var drinks = new Drinks ();
 
 function initialize(){
 	var arr = document.getElementsByTagName("*");
-	var type;
-	var temp = {}
+
+	//Build all Drinks elements
 	for(var i=0; i<arr.length; i++){
 		drinks.buildElement(arr.item(i));
 	}
-	drinks.ready();
-	function render(){
+
+	//Call ready function before first rendering
+	Drinks.ready();
+
+	//render all elements every 100ms
+	setInterval( () =>{
 		for(var e in earr){
 			if(document.getElementById(e))
 				earr[e].render();
 			else
 				drinks.removeElement(e);
 		}
-	}
-	setInterval(render, 100);	
+	}, 100);	
 }
 
 function have_parent(el){

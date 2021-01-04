@@ -1217,10 +1217,6 @@ function Graph(element){
 
 	Graph.inherits(ScaleOutput);
 	ScaleOutput.call(this, element);
-	if(this.width==null)
-		this.width = 450;
-	if(this.height==null)
-		this.height = 300;
 	var canvas = new Array(3);
 	canvas[0] = this.canvas;
 	canvas[0].setAttribute("id", "first");
@@ -1240,229 +1236,32 @@ function Graph(element){
 	canvas[2].style.zIndex="3";
 	canvas[2].style.position="absolute";
 	
-	this.container.appendChild(canvas[1]);
-	this.container.appendChild(canvas[2]);
 	var pen = new Array(3);
 	pen[0] = this.pen;
 	pen[1] = canvas[1].getContext('2d');
 	pen[2] = canvas[2].getContext('2d');
-	this.wx = this.width/460;
-	this.hx = this.width/300;
+
+	this.container.appendChild(canvas[1]);
+	this.container.appendChild(canvas[2]);
+
+	var main_grd;
 	var cindex=0;		
  	var on = 0;
 	var standby = false;
-	var start = 40*this.wx;
-	var starty = 10*this.hx;
-	var c=0;
-	var v=false;
-	this.channel = new Array();
-	this.divisions = element.getAttribute("hide_divisions") || 30;
-	this.hide_divisions = element.getAttribute("hide_divisions")=="true" || false;
-	this.hide_axis = element.getAttribute("hide_axis")=="true" || false;
-	this.scale = element.getAttribute("scale") || "range";
-	this.bgcolor = element.getAttribute("bgcolor") || "black";
-	var power_on_load = element.getAttribute("power_onload")=="true" || false;
-	this.setMode = function(m){
-		switch(m){
-			case "ch1":
-				mode = 0;
-				break;
-			case "ch2":
-				mode = 1;
-				break;
-			case "dual":
-				mode = 2;
-				break;
-			case "x/y":
-				mode = 3;
-				break;
-		}
-		this.clearScreen();
-		canvas[1-cindex].style.display="none";
-		canvas[cindex].style.display="block";
-	}
-
-	this.on = function(){
-		on = 1;
-	}
-	
-	this.off = function(){
-		on = 0;
-		k=0;
-		for(var i in this.channel){
-			this.channel[i].reset();
-				this.channel[i].end = false;
-				this.channel[i].index=0;
-		}	
-		canvas[0].width = canvas[0].width;
-		canvas[0].style.backgroundColor = '#000';
-		canvas[1].width = canvas[1].width;
-		canvas[1].style.backgroundColor = '#000';
-		canvas[1-cindex].style.display="none";
-		canvas[cindex].style.display="block";
-	}
-
-	this.isOn = function(){
-		return on==1;
-	}
-
-	this.isOff = function(){
-		return on==0;
-	}
-
-
-	this.clearScreen = function(){
-		canvas[cindex].width = canvas[cindex].width;
-		canvas[cindex].style.backgroundColor = this.bgcolor;
-	}
-	function Channel(id, obs, item){
-		this.__defineSetter__("amplitude", function(amp){
-			this._amplitude = amp;
-			v=true;
-			obs.clearScreen();
-		});
-
-		this.__defineGetter__("amplitude", function(){
-			return this._amplitude;
-		 });
-
-		this.__defineSetter__("amp4div", function(amp){
-			this._amp4div = amp;
-			if(obs.scale=="divisions")
-				this._amplitude = -(1/(8*amp));
-			v=true;
-			obs.clearScreen();
-		});
-
-		this.__defineGetter__("amp4div", function(){
-			return this._amp4div;
-		 });
-
-		this.__defineSetter__("sweep", function(s){
-			this._sweep = (1/s)*((this.divfactor));
-			v=true;
-			obs.clearScreen();
-		});
-
-		this.__defineGetter__("sweep", function(){
-			return this._sweep;
-		 });
-		this.divfactor = 1;
-		this.sweep = parseFloat(item.getAttribute("sweep")) || 1;
-
-		this.__defineSetter__("x_position", function(x){
-			this._x_position = x;
-			v=true;
-			obs.clearScreen();
-		});
-
-		this.__defineGetter__("x_position", function(){
-			return this._x_position;
-		 });
-
-		this.__defineSetter__("y_position", function(y){
-			this._y_position = y;
-			v=true;
-			obs.clearScreen();
-		});
-
-		this.__defineGetter__("y_position", function(){
-			return this._y_position;
-		 });
-		
-		this.reset = function(){
-			this.refresh = start;
-			this.end = true;
-		}
-
-		this.getPeakToPeak = function(){
-			return peak*2;
-		}
-
-		this.getPeak = function(){
-			return peak;
-		}
-		
-		this.getAverage = function(){
-			return average;
-		}
-
-		this.setPoints = function(p){
-			peak = null;
-			for(var i in p){
-				if(p[i]>peak || !peak)
-					peak = p[i];
-				temp_average+=parseFloat(p[i]);
-				this.point[i] = p[i];
-			}
-			var prec = obs.precision;
-			average = Math.round(temp_average/p.length*prec)/prec;
-			var div = this.divfactor;
-			this.divfactor = (obs.width-80*obs.wx)/(10*this.point.length);
-			this.sweep = div/this.sweep;
-
-		}
-
-		var peak = null;
-		var average = 0;
-		var temp_average = 0;
-		this.frequency = parseFloat(item.getAttribute("frequency")) || 1;
-		this.amplitude = parseFloat(item.getAttribute("amplitude")) || 1;
-		this.amp4div = parseFloat(item.getAttribute("amp4div")) || 1;
-		this.index = 0;
-		this.y_position = parseFloat(item.getAttribute("y_position")) || 0;
-		this.x_position = parseFloat(item.getAttribute("x_position")) || 0;
-		this.point = new Array();
-		this.prec_value=0;
-		this.end=false;
-		this.refresh = start; 
-		this.color = item.getAttribute("color") || "lawngreen";
-		this.href = item.getAttribute("href") || null;
-		this.oncompletescreen = item.getAttribute("oncompletescreen") || "";
-		this.ajax = new Ajax();
-	}
-	var z = 0;
-	for(var i=0; i<element.childNodes.length; i++){
-		if(element.childNodes[i].nodeName.toLowerCase()=="channel" && z<2){
-			element.childNodes[i].style.display='none';
-			this.channel[z] = new Channel(z, this, element.childNodes[i]);
-			if(element.childNodes[i].innerHTML!='')
-				this.channel[z].setPoints(JSON.parse(element.childNodes[i].innerHTML));
-			z++;
-		}
-	}
-
-	var first=true;
-	var time = this.refresh;
-	var k=0;
-	var mode=0;
-	var temp_mode = element.getAttribute("mode") || "ch1";
-	switch(temp_mode){
-		case "ch1":
-			mode = 0;
-			break;
-		case "ch2":
-			mode = 1;
-			break;
-		case "dual":
-			mode = 2;
-			break;
-		case "x/y":
-			mode = 3;
-			break;
-	}
 	var resolution=1;
+	if(this.width==null)
+		this.width = 450;
+	if(this.height==null)
+		this.height = 300;
 
-	var main_grd;
-	var createGradients = function(){
+	this.createGradients = () => {
 		main_grd = pen[cindex].createLinearGradient(-this.width, this.height/2, this.width, this.height/2);
 		main_grd.addColorStop(0, '#bbb');
 		main_grd.addColorStop(0.5, '#eee');
 		main_grd.addColorStop(1, '#bbb');
-	}.bind(this);
-	createGradients();
-	
-	var drawGrid = function(){
+	};
+
+	this.drawGrid = () => {
 		canvas[0].style.backgroundColor = this.bgcolor;
 		canvas[1].style.backgroundColor = this.bgcolor;
 		pen[2].strokeStyle = "black";
@@ -1548,12 +1347,264 @@ function Graph(element){
 				pen[2].stroke();
 			}
 		}	
-	}.bind(this);	
+	};	
 
+	Object.defineProperties (this, {
+		'max_range': {
+			set: (max_r) => {
+				this._max_range = max_r;
+				if(!first)
+					drawGrid();		
+			},
+			get: () => {return this._max_range}
+		},
+		'min_range': {
+			set: (min_r) => {
+				this._min_range = min_r;
+				if(!first)
+					drawGrid();		
+			},
+			get: () => {return this._min_range}
+		},
+		'width': {
+			set: (width) => {
+				this._width = width;
+				canvas[0].width=width;
+				this.container.style.width = width+'px';
+				this.wx = width/460;
+				start = 40*this.wx;
+				canvas[1].width = width;		
+				canvas[2].width = width;
+				this.createGradients();		
+				this.drawGrid();
+				for(var i in this.channel){
+					var div = this.channel[i].divfactor;
+					if(this.channel[i].point.length)
+						this.channel[i].divfactor = (this.width-80*this.wx)/(10*this.channel[i].point.length);
+					this.channel[i].sweep = div/this.channel[i].sweep;
+				}
+			},
+			get: () => {return this._width}
+		},
+		'height': {
+			set: (height) => {
+				this._height = height;
+				canvas[0].height=height;
+				this.container.style.height = height+'px';
+				this.hx = height/300;
+				starty = 10*this.hx;
+				canvas[1].height = height;
+				canvas[2].height = height;
+				this.createGradients();		
+				this.drawGrid();		
+			},
+			get: () => {return this._height}
+		}
+	})
 
+	this.wx = this.width/460;
+	this.hx = this.width/300;
+	var start = 40*this.wx;
+	var starty = 10*this.hx;
+	var c=0;
+	var v=false;
+	this.channel = new Array();
+	this.divisions = element.getAttribute("hide_divisions") || 30;
+	this.hide_divisions = element.getAttribute("hide_divisions")=="true" || false;
+	this.hide_axis = element.getAttribute("hide_axis")=="true" || false;
+	this.scale = element.getAttribute("scale") || "range";
+	this.bgcolor = element.getAttribute("bgcolor") || "black";
+	var power_on_load = element.getAttribute("power_onload")=="true" || false;
+	this.setMode = function(m){
+		switch(m){
+			case "ch1":
+				mode = 0;
+				break;
+			case "ch2":
+				mode = 1;
+				break;
+			case "dual":
+				mode = 2;
+				break;
+			case "x/y":
+				mode = 3;
+				break;
+		}
+		this.clearScreen();
+		canvas[1-cindex].style.display="none";
+		canvas[cindex].style.display="block";
+	}
+
+	this.on = function(){
+		on = 1;
+	}
 	
-		var drawWaveXY = function(){
-			if(on==0)
+	this.off = function(){
+		on = 0;
+		k=0;
+		for(var i in this.channel){
+			this.channel[i].reset();
+				this.channel[i].end = false;
+				this.channel[i].index=0;
+		}	
+		canvas[0].width = canvas[0].width;
+		canvas[0].style.backgroundColor = '#000';
+		canvas[1].width = canvas[1].width;
+		canvas[1].style.backgroundColor = '#000';
+		canvas[1-cindex].style.display="none";
+		canvas[cindex].style.display="block";
+	}
+
+	this.isOn = function(){
+		return on==1;
+	}
+
+	this.isOff = function(){
+		return on==0;
+	}
+
+
+	this.clearScreen = function(){
+		canvas[cindex].width = canvas[cindex].width;
+		canvas[cindex].style.backgroundColor = this.bgcolor;
+	}
+
+	function Channel(id, obs, item){
+		Object.defineProperties (this, {
+			'amplitude': {
+				set: (amp) => {
+					this._amplitude = amp;
+					v=true;
+					obs.clearScreen();	
+				},
+				get: () => {return this._amplitude}
+			},
+			'amp4div': {
+				set: (amp) =>{
+					this._amp4div = amp;
+					if(obs.scale=="divisions")
+						this._amplitude = -(1/(8*amp));
+					v=true;
+					obs.clearScreen();		
+				},
+				get: () => {return this._amp4div}
+			},
+			'sweep': {
+				set: (s) =>{
+					this._sweep = (1/s)*((this.divfactor));
+					v=true;
+					obs.clearScreen();		
+				},
+				get: () => {return this._sweep}
+			},
+			'x_position': {
+				set: (x) => {
+					this._x_position = x;
+					v=true;
+					obs.clearScreen();		
+				},
+				get: () => {return this._x_position}
+			},
+			'y_position': {
+				set: (y) => {
+					this._y_position = y;
+					v=true;
+					obs.clearScreen();		
+				},
+				get: () => {return this._y_position}
+			}
+		});
+
+		this.divfactor = 1;
+		this.sweep = parseFloat(item.getAttribute("sweep")) || 1;
+		
+		this.reset = function(){
+			this.refresh = start;
+			this.end = true;
+		}
+
+		this.getPeakToPeak = function(){
+			return peak*2;
+		}
+
+		this.getPeak = function(){
+			return peak;
+		}
+		
+		this.getAverage = function(){
+			return average;
+		}
+
+		this.setPoints = function(p){
+			peak = null;
+			for(var i in p){
+				if(p[i]>peak || !peak)
+					peak = p[i];
+				temp_average+=parseFloat(p[i]);
+				this.point[i] = p[i];
+			}
+			var prec = obs.precision;
+			average = Math.round(temp_average/p.length*prec)/prec;
+			var div = this.divfactor;
+			this.divfactor = (obs.width-80*obs.wx)/(10*this.point.length);
+			this.sweep = div/this.sweep;
+
+		}
+
+		var peak = null;
+		var average = 0;
+		var temp_average = 0;
+		this.frequency = parseFloat(item.getAttribute("frequency")) || 1;
+		this.amplitude = parseFloat(item.getAttribute("amplitude")) || 1;
+		this.amp4div = parseFloat(item.getAttribute("amp4div")) || 1;
+		this.index = 0;
+		this.y_position = parseFloat(item.getAttribute("y_position")) || 0;
+		this.x_position = parseFloat(item.getAttribute("x_position")) || 0;
+		this.point = new Array();
+		this.prec_value=0;
+		this.end=false;
+		this.refresh = start; 
+		this.color = item.getAttribute("color") || "lawngreen";
+		this.href = item.getAttribute("href") || null;
+		this.oncompletescreen = item.getAttribute("oncompletescreen") || "";
+		this.ajax = new Ajax();
+	}
+
+	var z = 0;
+	for(var i=0; i<element.childNodes.length; i++){
+		if(element.childNodes[i].nodeName.toLowerCase()=="channel" && z<2){
+			element.childNodes[i].style.display='none';
+			this.channel[z] = new Channel(z, this, element.childNodes[i]);
+			if(element.childNodes[i].innerHTML!='')
+				this.channel[z].setPoints(JSON.parse(element.childNodes[i].innerHTML));
+			z++;
+		}
+	}
+
+	var first=true;
+	var time = this.refresh;
+	var k=0;
+	var mode=0;
+	var temp_mode = element.getAttribute("mode") || "ch1";
+	switch(temp_mode){
+		case "ch1":
+			mode = 0;
+			break;
+		case "ch2":
+			mode = 1;
+			break;
+		case "dual":
+			mode = 2;
+			break;
+		case "x/y":
+			mode = 3;
+			break;
+	}
+
+	this.createGradients();
+	
+	var drawWaveXY = function(){
+		if(on==0)
 				return;
 			pen[cindex].strokeStyle = this.channel[0].color;
 			this.prec_value=this.channel[0].point[this.channel[0].index];
@@ -1644,72 +1695,10 @@ function Graph(element){
 				this.channel[ch].index=(this.channel[ch].index+resolution)%this.channel[ch].point.length;
 	}.bind(this);
 
-	this.__defineSetter__("max_range", function(max_r){
-		this._max_range = max_r;
-		if(!first)
-			drawGrid();
-	});
-
-	this.__defineGetter__("max_range", function(){
-		return this._max_range;
-	});
-
 	this.max_range = parseFloat(element.getAttribute("max_range")) || 5;
-
-	this.__defineSetter__("min_range", function(min_r){
-		this._min_range = min_r;
-		if(!first)
-			drawGrid();
-	});
-
-	this.__defineGetter__("min_range", function(){
-		return this._min_range;
-	});
-
 	this.min_range = parseFloat(element.getAttribute("min_range")) || -5;
 	this.value=this.prec_value=this.min_range || 0;
-
-	this.__defineSetter__("width", function(width){
-		this._width = width;
-		canvas[0].width=width;
-		this.container.style.width = width+'px';
-		this.wx = width/460;
-		start = 40*this.wx;
-		canvas[1].width = width;		
-		canvas[2].width = width;
-		createGradients();		
-		drawGrid();
-		for(var i in this.channel){
-			var div = this.channel[i].divfactor;
-			if(this.channel[i].point.length)
-				this.channel[i].divfactor = (this.width-80*this.wx)/(10*this.channel[i].point.length);
-			this.channel[i].sweep = div/this.channel[i].sweep;
-		}
-
-	});
-
-	this.__defineGetter__("width", function(){
-		return this._width;
-	 });
-	
 	this.width = this.canvas.width;
-
-	this.__defineSetter__("height", function(height){
-		this._height = height;
-		canvas[0].height=height;
-		this.container.style.height = height+'px';
-		this.hx = height/300;
-		starty = 10*this.hx;
-		canvas[1].height = height;
-		canvas[2].height = height;
-		createGradients();		
-		drawGrid();
-	});
-
-	this.__defineGetter__("height", function(){
-		return this._height;
-	 });
-
 	this.height = this.canvas.height;
 
 

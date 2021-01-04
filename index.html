@@ -4,11 +4,37 @@
         <script src="Drinks.js"></script>
         <script>
         function upd_gau (v) {
+            //update gauge when knob changes position
             gau.value = v;
+        }
+
+        Drinks.preload = () => {
+            //load only nereded modules
+            Drinks.modules = ['display.js', 'knob.js', 'slider.js']
+        }
+
+        Drinks.ready = () => {
+            //fill oscilloscope data array
+            oscope.channel[1].y_position = 2;
+            var c1=new Array;
+            var c2 = new Array;
+            
+            for (i=0;i<360; i++){
+                c1[i] = Math.round (Math.sin(i*Math.PI/180)*3*100)/100;
+                c2[i] = (c1[i]>0)?1 : 0;
+            }
+            oscope.channel[0].setPoints(c1);
+            oscope.channel[1].setPoints(c2);
+
+            oscope.on ();
         }
         </script>
     </head>
     <body>
+        <display id="oscope" type="graph" mode="dual">
+            <channel id="ch1" frequency="1000" sweep="0.0005"></channel>
+            <channel id="ch2" frequency="1000" sweep="0.0005" color="red"></channel>
+        </display>
         <display id="gau" label="Gauge"></display>
         <knob id="k1" onchange="upd_gau (this.value)" name="money"></knob>
         <knob id="k2" type="digital" name="who">
