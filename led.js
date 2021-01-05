@@ -166,7 +166,7 @@ function RectLed(element){
 		pen.stroke();
 		pen.fill();
 		if (this._text) {
-			pen.font = 'bold ' + (this.height/2) + 'px Helvetica';
+			pen.font = 'bold ' + (this.height/4) + 'px Helvetica';
 			pen.fillStyle = 'black';
 			pen.textAlign = 'center';
 			pen.textBaseline = 'middle';

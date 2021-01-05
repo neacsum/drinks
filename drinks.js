@@ -326,7 +326,12 @@ class Drinks{
 		return angle;
 	}
 	//list of Drinks modules
-	static modules = ['display.js', 'knob.js', 'led.js', 'switch.js', 'slider.js'];
+	static modules = [
+		'disp_gauge.js', 'disp_7seg.js', 'disp_graph.js', 'disp_lvl.js', 'disp_therm.js', 'disp_vum.js',
+		'knob.js', 'led.js', 
+		'sw_arc.js', 'sw_circle.js', 'sw_rect.js', 'sw_rocker.js', 'sw_side.js', 'sw_toggle.js',
+		'slider.js',
+	    'arcled.js', 'gaugeadv.js'];
 };
 
 var drinks = new Drinks ();
@@ -427,7 +432,6 @@ function Instrument(element){
 	this.container.style.boxSizing="border-box";
 	this.x=0;
 	this.y=0;
-	this.ajax = new Ajax();
 	this._precision= element.getAttribute("precision") || "auto";
 	this.hide_grid = element.getAttribute("hide_grid")=="true" || false;
 	this.divisions = element.getAttribute ("divisions") || 100;
@@ -447,7 +451,8 @@ function Instrument(element){
 					rotstyle = "transform: rotate(" + r + "deg); box-sizing:border-box; ";
 				this.html.setAttribute("style", this.html.getAttribute("style") + rotstyle);
 			},
-			get: () => { return this._rotate }
+			get: () => { return this._rotate },
+			configurable: true
 		},
 		'label': {
 			set: (label)=>{
@@ -515,7 +520,8 @@ function Instrument(element){
 					this._precision = Math.pow(10, cipher);
 				}
 				return this._precision;	
-			}	
+			},
+			configurable: true	
 		}
 	});
 
@@ -658,6 +664,24 @@ function Instrument(element){
 			this._value = this.options[0].value;
 		}
 	}
+	
+	this.make_binary   = () => {
+		this.min_range=0;
+		this.max_range=1;
+	
+		this.on = function(){
+			this.value=1;
+		}
+	
+		this.off = function(){
+			this.value=0;
+		}
+	
+		this.toggle = function(){
+			this.value^=1;
+		}
+	}
+	
 }
 
 function Manager(){
@@ -695,42 +719,18 @@ function Manager(){
 
 }
 
-function Binary(element){
-	this.min_range=0;
-	this.max_range=1;
-
-	this.on = function(){
-		this.value=1;
-	}
-
-	this.off = function(){
-		this.value=0;
-	}
-
-	this.toggle = function(){
-		this.value^=1;
-	}
-
-	this.binaryCommonOperations = function(){
-
-	}
-}
-
 function BinaryInput(element){
 	BinaryInput.inherits(Instrument);
 	Instrument.call(this, element);
-	BinaryInput.inherits(Binary);
-	Binary.call(this, element);
 
-	this.binaryInputCommonOperations = function(){
-		this.instrumentCommonOperations();
-		this.binaryCommonOperations();
-	}
+	this.make_binary ();
+	this.input = true;
 }
 
 function MoveInput(element){
 	MoveInput.inherits(Instrument);
 	Instrument.call(this, element);
+	this.input = true;
 	var drag=0;
 	var move=null;
 	this.x_root=0;
@@ -933,12 +933,11 @@ function ScaleOutput(element){
 function BinaryOutput(element){
 	BinaryOutput.inherits(Instrument);
 	Instrument.call(this, element);
-	BinaryOutput.inherits(Binary);
-	Binary.call(this, element);
+
+	this.make_binary ();
 
 	this.binaryOutputCommonOperations=function(){
 		this.instrumentCommonOperations();
-		this.binaryCommonOperations();
 	}
 }
 

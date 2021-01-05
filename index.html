@@ -9,8 +9,8 @@
         }
 
         Drinks.preload = () => {
-            //load only nereded modules
-            Drinks.modules = ['display.js', 'knob.js', 'slider.js', 'led.js', 'switch.js']
+            //load only needed modules
+//            Drinks.modules = ['display.js', 'knob.js', 'slider.js', 'led.js', 'switch.js']
         }
 
         Drinks.ready = () => {
@@ -27,36 +27,43 @@
             oscope.channel[1].setPoints(c2);
 
             oscope.on ();
-
-            //turn on leds
-            rled.on ();
-            sqled.on ();
         }
 
-        function upd_led (v) {
+        function r2 (v) {
+            sqled.value = v;
+        }
+        function r1 (v) {
             rled.value = v;
-            if (v) {
-                sqled.on ();
-            }
-            else {
-                sqled.off ();
-            }
-        }
+        }        
         </script>
     </head>
     <body>
         <led type="round" label="Round Led" id="rled" radius="40"></led>
-        <p></p>
+        <div style="clear:both"></div>
         <led type="rect" label="Rect Led" id="sqled" width="120" height="20">TEXT</led>
-        <switch id="sw1" onchange="upd_led (this.value)"></switch>
-        <p>&nbsp;</p>
+        <div style="clear:both"></div>
+        <led type="triangle" label="Triangle Led" id="tled"></led>
+        <div style="clear:both"></div>
+        <switch id="sw1" onchange="r2(this.value)" label="Toggle sw"></switch>
+        <div style="clear:both"></div>
+        <switch id="sw2" type="side" onchange="r1(this.value)" label="Side sw"></switch>
+        <div style="clear:both"></div>
+        <switch id="sw3" type="rect" label="Rect sw"></switch>
+        <div style="clear:both"></div>
+        <switch id="sw4" type="rocker" label="Rocker sw"></switch>
+        <div style="clear:both"></div>
+        <switch id="sw5" type="circle" onchange="tled.value=this.value" label="Circle sw"></switch>
+        <div style="clear:both"></div>
+        <switch id="sw6" type="arc" label="Arc sw"></switch>
+        <div style="clear:both"></div>
         <display id="gau" label="Gauge"></display>
+        <div style="clear:both"></div>
         <knob id="k1" onchange="upd_gau (this.value)" name="money"></knob>
+        <div style="clear:both"></div>
         <display id="oscope" type="graph" mode="dual">
             <channel id="ch1" frequency="1000" sweep="0.0005"></channel>
             <channel id="ch2" frequency="1000" sweep="0.0005" color="red"></channel>
         </display>
-        <p></p>
         <knob id="k2" type="digital" name="who">
             <option value="good">Good</option>
             <option value="bad">Bad</option>
